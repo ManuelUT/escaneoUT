@@ -153,6 +153,28 @@ body {
     padding-top: calc(48px + var(--safe-top));
 }
 
+.btn-back {
+    position: absolute;
+    left: 12px;
+    top: calc(40px + var(--safe-top));
+    background: rgba(255,255,255,0.15);
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    cursor: pointer;
+    -webkit-appearance: none;
+    z-index: 3;
+}
+
+.btn-back:active {
+    background: rgba(255,255,255,0.3);
+}
+
 .scanner-title {
     color: #fff;
     font-size: 22px;
@@ -304,3 +326,37 @@ body {
     body { padding: 0; }
 }
 
+
+/* ── Barra inferior del escáner ── */
+.scanner-bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 24px calc(20px + var(--safe-bottom));
+    display: flex;
+    justify-content: center;
+    z-index: 3;
+}
+
+.btn-capture {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 28px;
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    -webkit-appearance: none;
+}
+
+.btn-capture:active {
+    background: rgba(255,255,255,0.35);
+}

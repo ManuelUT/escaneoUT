@@ -11,7 +11,6 @@ const FOCUS_STABILIZATION_MS = 1500;
 const SCAN_COOLDOWN_MS = 2500;
 const REQUIRED_CONFIRMATIONS = 2;
 
-// Lista de archivos QR y resultado (se descubren dinámicamente o se hardcodean)
 const QR_FILES = ['1.png','2.png','3.png','4.png','5.png','6.png','7.png','8.png','9.png','10.png'];
 const RESULTADO_FILES = ['1.png','2.png','3.png','4.png','5.png','6.png','7.png','8.png'];
 
@@ -19,7 +18,7 @@ const RESULTADO_FILES = ['1.png','2.png','3.png','4.png','5.png','6.png','7.png'
 //  Estado
 // ══════════════════════════════════════════
 
-let qrMap = {};          // contenido QR normalizado → nombre archivo resultado
+let qrMap = {};
 let qrMapReady = false;
 let cameraStream = null;
 let scanAnimFrame = null;
@@ -33,20 +32,22 @@ let confirmationCount = 0;
 //  Elementos DOM
 // ══════════════════════════════════════════
 
-const welcomeScreen   = document.getElementById('welcomeScreen');
-const scannerScreen   = document.getElementById('scannerScreen');
-const resultScreen    = document.getElementById('resultScreen');
-const errorScreen     = document.getElementById('errorScreen');
-const btnEscanear     = document.getElementById('btnEscanear');
-const btnEscanearOtro = document.getElementById('btnEscanearOtro');
-const btnReintentar   = document.getElementById('btnReintentar');
-const cameraVideo     = document.getElementById('cameraVideo');
-const cameraCanvas    = document.getElementById('cameraCanvas');
-const scannerStatus   = document.getElementById('scannerStatus');
-const imgResultado    = document.getElementById('imgResultado');
-const txtNombreArchivo= document.getElementById('txtNombreArchivo');
-const txtError        = document.getElementById('txtError');
-const loadingOverlay  = document.getElementById('loadingOverlay');
+const welcomeScreen    = document.getElementById('welcomeScreen');
+const scannerScreen    = document.getElementById('scannerScreen');
+const resultScreen     = document.getElementById('resultScreen');
+const errorScreen      = document.getElementById('errorScreen');
+const btnEscanear      = document.getElementById('btnEscanear');
+const btnEscanearOtro  = document.getElementById('btnEscanearOtro');
+const btnReintentar    = document.getElementById('btnReintentar');
+const btnVolver        = document.getElementById('btnVolver');
+const btnCapturarFoto  = document.getElementById('btnCapturarFoto');
+const inputFoto        = document.getElementById('inputFoto');
+const cameraVideo      = document.getElementById('cameraVideo');
+const cameraCanvas     = document.getElementById('cameraCanvas');
+const scannerStatus    = document.getElementById('scannerStatus');
+const imgResultado     = document.getElementById('imgResultado');
+const txtNombreArchivo = document.getElementById('txtNombreArchivo');
+const txtError         = document.getElementById('txtError');
 
 // ══════════════════════════════════════════
 //  Navegación entre pantallas
@@ -59,13 +60,18 @@ function showScreen(screen) {
     screen.classList.add('active');
 }
 
+function volverAInicio() {
+    detenerCamara();
+    showScreen(welcomeScreen);
+}
+
 // ══════════════════════════════════════════
-//  Carga dinámica de QRs (como la app Android)
+//  Carga dinámica de QRs
 // ══════════════════════════════════════════
 
 async function cargarQRs() {
     if (typeof jsQR === 'undefined') {
-        console.warn('jsQR no cargado, se usará matching por nombre de archivo.');
+        console.warn('jsQR no cargado, se usará matching por nombre.');
         qrMapReady = true;
         return;
     }
@@ -80,7 +86,7 @@ async function cargarQRs() {
             await new Promise((resolve, reject) => {
                 img.onload = resolve;
                 img.onerror = reject;
-                img.src = `qr/${filename}`;
+                img.src = 'qr/' + filename;
             });
 
             canvas.width = img.naturalWidth;
@@ -99,8 +105,7 @@ async function cargarQRs() {
                 qrMap[key] = filename;
             }
         } catch (e) {
-            // Saltar archivos con error
-            console.warn(`Error cargando QR ${filename}:`, e);
+            console.warn('Error cargando QR ' + filename + ':', e);
         }
     }
 
@@ -117,7 +122,6 @@ async function iniciarCamara() {
     scannerStatus.textContent = 'Iniciando cámara…';
 
     try {
-        // Preferir cámara trasera
         cameraStream = await navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: { ideal: 'environment' },
@@ -137,20 +141,14 @@ async function iniciarCamara() {
 
         scannerStatus.textContent = 'Enfocando cámara…';
 
-        // Esperar a que el autofoco se estabilice, luego empezar a escanear
-        setTimeout(() => {
+        setTimeout(function() {
             scannerStatus.textContent = 'Apunta la cámara al código QR';
             escanearFrames();
         }, FOCUS_STABILIZATION_MS);
 
     } catch (err) {
         console.error('Error cámara:', err);
-        scannerStatus.textContent = 'No se pudo acceder a la cámara';
-
-        // Fallback iOS: si getUserMedia falla, ofrecer captura por foto
-        if (/iPhone|iPad/.test(navigator.userAgent)) {
-            setTimeout(() => ofrecerCapturaFoto(), 1000);
-        }
+        scannerStatus.textContent = 'No se pudo acceder a la cámara. Usa "Tomar foto".';
     }
 }
 
@@ -160,7 +158,7 @@ function detenerCamara() {
         scanAnimFrame = null;
     }
     if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream.getTracks().forEach(function(track) { track.stop(); });
         cameraStream = null;
     }
     cameraVideo.srcObject = null;
@@ -169,8 +167,8 @@ function detenerCamara() {
 function escanearFrames() {
     if (!cameraStream || isProcessing) return;
 
-    const canvas = cameraCanvas;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    var canvas = cameraCanvas;
+    var ctx = canvas.getContext('2d', { willReadFrequently: true });
 
     function tick() {
         if (!cameraStream || isProcessing) return;
@@ -180,10 +178,10 @@ function escanearFrames() {
             canvas.height = cameraVideo.videoHeight;
             ctx.drawImage(cameraVideo, 0, 0);
 
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
             if (typeof jsQR !== 'undefined') {
-                const code = jsQR(imageData.data, canvas.width, canvas.height, {
+                var code = jsQR(imageData.data, canvas.width, canvas.height, {
                     inversionAttempts: 'dontInvert'
                 });
 
@@ -200,16 +198,12 @@ function escanearFrames() {
 }
 
 function procesarLectura(texto) {
-    const now = Date.now();
+    var now = Date.now();
 
-    // Ignorar durante estabilización de enfoque
     if (now - cameraStartTime < FOCUS_STABILIZATION_MS) return;
-
-    // Cooldown
     if (now - lastScanTime < SCAN_COOLDOWN_MS) return;
     if (isProcessing) return;
 
-    // Confirmación: misma lectura N veces seguidas
     if (texto === lastPartialRead) {
         confirmationCount++;
     } else {
@@ -219,11 +213,9 @@ function procesarLectura(texto) {
 
     if (confirmationCount < REQUIRED_CONFIRMATIONS) return;
 
-    // QR confirmado
     resetConfirmacion();
     lastScanTime = now;
     isProcessing = true;
-
     mostrarResultado(texto);
 }
 
@@ -233,48 +225,43 @@ function resetConfirmacion() {
 }
 
 // ══════════════════════════════════════════
-//  Fallback: Captura por foto (iOS sin cámara en vivo)
+//  Captura por foto (fallback / iOS PWA)
 // ══════════════════════════════════════════
 
-function ofrecerCapturaFoto() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.capture = 'environment';
-    input.style.display = 'none';
-    document.body.appendChild(input);
+function procesarFotoCapturada(file) {
+    if (!file) return;
 
-    input.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const img = new Image();
-        const url = URL.createObjectURL(file);
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+            var canvas = document.createElement('canvas');
             canvas.width = img.naturalWidth;
             canvas.height = img.naturalHeight;
-            const ctx = canvas.getContext('2d');
+            var ctx = canvas.getContext('2d');
+            // Fondo blanco para transparencias
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(img, 0, 0);
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
             if (typeof jsQR !== 'undefined') {
-                const code = jsQR(imageData.data, canvas.width, canvas.height, {
+                var code = jsQR(imageData.data, canvas.width, canvas.height, {
                     inversionAttempts: 'attemptBoth'
                 });
                 if (code && code.data) {
+                    isProcessing = true;
                     mostrarResultado(code.data.trim());
                 } else {
                     mostrarError('No se detectó un código QR en la imagen');
                 }
+            } else {
+                mostrarError('Librería de escaneo no disponible');
             }
-            URL.revokeObjectURL(url);
         };
-        img.src = url;
-        document.body.removeChild(input);
-    });
-
-    input.click();
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
 }
 
 // ══════════════════════════════════════════
@@ -284,44 +271,42 @@ function ofrecerCapturaFoto() {
 async function mostrarResultado(textoEscaneado) {
     // Esperar al mapa si aún carga
     if (!qrMapReady) {
-        const start = Date.now();
+        var start = Date.now();
         while (!qrMapReady && Date.now() - start < 3000) {
-            await new Promise(r => setTimeout(r, 50));
+            await new Promise(function(r) { setTimeout(r, 50); });
         }
     }
 
-    const textoNorm = textoEscaneado.trim().toLowerCase();
+    var textoNorm = textoEscaneado.trim().toLowerCase();
 
     // 1. Coincidencia exacta en el mapa QR
-    let archivoDestino = qrMap[textoNorm] || null;
+    var archivoDestino = qrMap[textoNorm] || null;
 
-    // 2. Fallback: texto es el nombre del archivo
+    // 2. Fallback: texto es nombre del archivo
     if (!archivoDestino) {
-        archivoDestino = RESULTADO_FILES.find(f =>
-            f.toLowerCase() === textoEscaneado.toLowerCase() ||
-            f.replace(/\.[^.]+$/, '').toLowerCase() === textoEscaneado.toLowerCase()
-        ) || null;
+        archivoDestino = RESULTADO_FILES.find(function(f) {
+            return f.toLowerCase() === textoEscaneado.toLowerCase() ||
+                   f.replace(/\.[^.]+$/, '').toLowerCase() === textoEscaneado.toLowerCase();
+        }) || null;
     }
 
-    // 3. Fallback: nombre del archivo está dentro del texto
+    // 3. Fallback: nombre del archivo dentro del texto
     if (!archivoDestino) {
-        archivoDestino = RESULTADO_FILES.find(f => {
-            const nameNoExt = f.replace(/\.[^.]+$/, '').toLowerCase();
+        archivoDestino = RESULTADO_FILES.find(function(f) {
+            var nameNoExt = f.replace(/\.[^.]+$/, '').toLowerCase();
             return textoNorm.includes(nameNoExt);
         }) || null;
     }
 
-    // 4. Verificar que el archivo resultado existe
+    // 4. Mostrar resultado o error
     if (archivoDestino && RESULTADO_FILES.includes(archivoDestino)) {
         detenerCamara();
-
-        const nombreAmigable = archivoDestino.replace(/\.[^.]+$/, '');
-        txtNombreArchivo.textContent = `Invitación ${nombreAmigable}`;
-        imgResultado.src = `resultado/${archivoDestino}`;
-
+        var nombreAmigable = archivoDestino.replace(/\.[^.]+$/, '');
+        txtNombreArchivo.textContent = 'Invitación ' + nombreAmigable;
+        imgResultado.src = 'resultado/' + archivoDestino;
         showScreen(resultScreen);
     } else {
-        mostrarError(`QR no reconocido: ${textoEscaneado}`);
+        mostrarError('QR no reconocido: ' + textoEscaneado);
     }
 }
 
@@ -329,7 +314,6 @@ function mostrarError(mensaje) {
     isProcessing = false;
     resetConfirmacion();
     detenerCamara();
-
     txtError.textContent = mensaje;
     showScreen(errorScreen);
 }
@@ -338,42 +322,53 @@ function mostrarError(mensaje) {
 //  Eventos
 // ══════════════════════════════════════════
 
-btnEscanear.addEventListener('click', () => {
+btnEscanear.addEventListener('click', function() {
     iniciarCamara();
 });
 
-btnEscanearOtro.addEventListener('click', () => {
+btnEscanearOtro.addEventListener('click', function() {
     iniciarCamara();
 });
 
-btnReintentar.addEventListener('click', () => {
+btnReintentar.addEventListener('click', function() {
     iniciarCamara();
+});
+
+btnVolver.addEventListener('click', function() {
+    volverAInicio();
+});
+
+btnCapturarFoto.addEventListener('click', function() {
+    inputFoto.value = '';
+    inputFoto.click();
+});
+
+inputFoto.addEventListener('change', function(e) {
+    var file = e.target.files[0];
+    if (file) {
+        procesarFotoCapturada(file);
+    }
 });
 
 // ══════════════════════════════════════════
 //  Inicialización
 // ══════════════════════════════════════════
 
-window.addEventListener('load', () => {
-    // Registrar Service Worker para offline
+window.addEventListener('load', function() {
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('SW registrado:', reg.scope))
-            .catch(err => console.warn('SW error:', err));
+            .then(function(reg) { console.log('SW registrado:', reg.scope); })
+            .catch(function(err) { console.warn('SW error:', err); });
     }
-
-    // Cargar mapa de QRs en background
     cargarQRs();
 });
 
-// Limpiar cámara al salir
-window.addEventListener('beforeunload', () => {
+window.addEventListener('beforeunload', function() {
     detenerCamara();
 });
 
-document.addEventListener('visibilitychange', () => {
+document.addEventListener('visibilitychange', function() {
     if (document.hidden && cameraStream) {
         detenerCamara();
     }
 });
-

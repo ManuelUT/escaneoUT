@@ -30,6 +30,11 @@
     <!-- ═══ Pantalla del Escáner ═══ -->
     <div id="scannerScreen" class="screen">
         <div class="scanner-header">
+            <button id="btnVolver" class="btn-back" aria-label="Volver">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                </svg>
+            </button>
             <h1 class="scanner-title">Ximbal</h1>
         </div>
         <video id="cameraVideo" autoplay playsinline muted></video>
@@ -38,6 +43,17 @@
             <div class="scanner-frame"></div>
         </div>
         <p id="scannerStatus" class="scanner-status">Enfocando cámara…</p>
+        <div class="scanner-bottom-bar">
+            <!-- Botón de captura por foto (alternativa para iOS PWA) -->
+            <button id="btnCapturarFoto" class="btn-capture">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 15.2c1.8 0 3.2-1.4 3.2-3.2S13.8 8.8 12 8.8 8.8 10.2 8.8 12s1.4 3.2 3.2 3.2zm8-8.8h-3.2l-1.6-2H8.8l-1.6 2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8.4c0-1.1-.9-2-2-2z"/>
+                </svg>
+                Tomar foto
+            </button>
+        </div>
+        <!-- Input oculto para captura por foto -->
+        <input type="file" id="inputFoto" accept="image/*" capture="environment" style="display:none;">
     </div>
 
     <!-- ═══ Pantalla de Resultado ═══ -->
