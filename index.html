@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#F5EBD9">
+    <title>Ximbal</title>
+
+    <!-- PWA / iOS -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ximbal">
+    <link rel="apple-touch-icon" href="icons/logo.png">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ═══ Pantalla de Bienvenida ═══ -->
+    <div id="welcomeScreen" class="screen active">
+        <img id="imgLogo" src="icons/logo.png" alt="Logo de Ximbal" class="logo">
+        <button id="btnEscanear" class="btn-primary">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 11h2V9H3v2zm0-4h2V5h2V3H3v4zm4 12H5v-2H3v4h4v-2zm10-12h2v2h2V7h-4v4h2V9zm-2 12v-2h2v-2h2v4h-4zm2-16V3h-4v2h2v2h2zM3 15h2v-2H3v2zm16 0h2v-2h-2v2zM5 5h6v6H5V5zm2 2v2h2V7H7zm6-2h6v6h-6V5zm2 2v2h2V7h-2zM5 13h6v6H5v-6zm2 2v2h2v-2H7zm6 0h2v2h-2v-2zm4 2h2v-2h-2v2zm-4-4h2v2h-2v-2zm4 0h2v2h-2v-2z"/>
+            </svg>
+            Escanear Invitación
+        </button>
+    </div>
+
+    <!-- ═══ Pantalla del Escáner ═══ -->
+    <div id="scannerScreen" class="screen">
+        <div class="scanner-header">
+            <h1 class="scanner-title">Ximbal</h1>
+        </div>
+        <video id="cameraVideo" autoplay playsinline muted></video>
+        <canvas id="cameraCanvas" style="display:none;"></canvas>
+        <div class="scanner-overlay">
+            <div class="scanner-frame"></div>
+        </div>
+        <p id="scannerStatus" class="scanner-status">Enfocando cámara…</p>
+    </div>
+
+    <!-- ═══ Pantalla de Resultado ═══ -->
+    <div id="resultScreen" class="screen">
+        <div class="result-content">
+            <svg class="result-icon" width="56" height="56" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+            </svg>
+            <h2 class="result-title">Invitación Verificada</h2>
+            <p class="result-subtitle">Se encontró la invitación correspondiente</p>
+            <p id="txtNombreArchivo" class="result-filename"></p>
+            <div class="result-card">
+                <img id="imgResultado" alt="Imagen de resultado">
+            </div>
+            <button id="btnEscanearOtro" class="btn-tonal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 11h2V9H3v2zm0-4h2V5h2V3H3v4zm4 12H5v-2H3v4h4v-2zm10-12h2v2h2V7h-4v4h2V9zm-2 12v-2h2v-2h2v4h-4zm2-16V3h-4v2h2v2h2zM3 15h2v-2H3v2zm16 0h2v-2h-2v2zM5 5h6v6H5V5zm2 2v2h2V7H7zm6-2h6v6h-6V5zm2 2v2h2V7h-2zM5 13h6v6H5v-6zm2 2v2h2v-2H7zm6 0h2v2h-2v-2zm4 2h2v-2h-2v2zm-4-4h2v2h-2v-2zm4 0h2v2h-2v-2z"/>
+                </svg>
+                Escanear otro código
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══ Pantalla de Error (QR no reconocido) ═══ -->
+    <div id="errorScreen" class="screen">
+        <div class="result-content">
+            <svg class="error-icon" width="56" height="56" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            <h2 class="result-title">QR No Reconocido</h2>
+            <p id="txtError" class="result-subtitle"></p>
+            <button id="btnReintentar" class="btn-tonal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 11h2V9H3v2zm0-4h2V5h2V3H3v4zm4 12H5v-2H3v4h4v-2zm10-12h2v2h2V7h-4v4h2V9zm-2 12v-2h2v-2h2v4h-4zm2-16V3h-4v2h2v2h2zM3 15h2v-2H3v2zm16 0h2v-2h-2v2zM5 5h6v6H5V5zm2 2v2h2V7H7zm6-2h6v6h-6V5zm2 2v2h2V7h-2zM5 13h6v6H5v-6zm2 2v2h2v-2H7zm6 0h2v2h-2v-2zm4 2h2v-2h-2v2zm-4-4h2v2h-2v-2zm4 0h2v2h-2v-2z"/>
+                </svg>
+                Reintentar
+            </button>
+        </div>
+    </div>
+
+    <!-- Cargando indicador -->
+    <div id="loadingOverlay" class="loading-overlay" style="display:none;">
+        <div class="spinner"></div>
+        <p>Cargando invitaciones…</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+

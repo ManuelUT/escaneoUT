@@ -1,0 +1,20 @@
+{
+    "name": "Ximbal - Escáner de Invitaciones",
+    "short_name": "Ximbal",
+    "description": "Escanea códigos QR para verificar invitaciones",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#F5EBD9",
+    "theme_color": "#F5EBD9",
+    "categories": ["utilities"],
+    "icons": [
+        {
+            "src": "icons/logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
+
