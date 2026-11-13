@@ -1,10 +1,12 @@
-const STORAGE_KEY = 'control_mesas_invitados_v4';
-const STORAGE_BACKUP_KEY = 'control_mesas_invitados_v4_backup';
-const QR_MAP_KEY = 'mapa_codigos_qr_mesas_v4';
+const TOTAL_MESAS = 8;
+const STORAGE_KEY = 'control_mesas_invitados_v5_8mesas';
+const STORAGE_BACKUP_KEY = 'control_mesas_invitados_v5_8mesas_backup';
+const LEGACY_STORAGE_KEY = 'control_mesas_invitados_v4';
+const QR_MAP_KEY = 'mapa_codigos_qr_mesas_v5_8mesas';
 const IDB_NAME = 'MesasQRFailSafeDB';
 const IDB_STORE = 'estado_mesas_store';
 
-// Datos iniciales de las 10 mesas (basados en tu boceto y en los 10 QR de qr.zip)
+// Datos iniciales de las 8 mesas
 const MESAS_INICIALES = {
   1: {
     numero: 1,
@@ -101,30 +103,6 @@ const MESAS_INICIALES = {
       { id: 'm8-5', nombre: 'Invitado 5', presente: false, hora: null },
       { id: 'm8-6', nombre: 'Invitado 6', presente: false, hora: null }
     ]
-  },
-  9: {
-    numero: 9,
-    qr: 'qr/9.png',
-    invitados: [
-      { id: 'm9-1', nombre: 'Invitado 1', presente: false, hora: null },
-      { id: 'm9-2', nombre: 'Invitado 2', presente: false, hora: null },
-      { id: 'm9-3', nombre: 'Invitado 3', presente: false, hora: null },
-      { id: 'm9-4', nombre: 'Invitado 4', presente: false, hora: null },
-      { id: 'm9-5', nombre: 'Invitado 5', presente: false, hora: null },
-      { id: 'm9-6', nombre: 'Invitado 6', presente: false, hora: null }
-    ]
-  },
-  10: {
-    numero: 10,
-    qr: 'qr/10.png',
-    invitados: [
-      { id: 'm10-1', nombre: 'Invitado 1', presente: false, hora: null },
-      { id: 'm10-2', nombre: 'Invitado 2', presente: false, hora: null },
-      { id: 'm10-3', nombre: 'Invitado 3', presente: false, hora: null },
-      { id: 'm10-4', nombre: 'Invitado 4', presente: false, hora: null },
-      { id: 'm10-5', nombre: 'Invitado 5', presente: false, hora: null },
-      { id: 'm10-6', nombre: 'Invitado 6', presente: false, hora: null }
-    ]
   }
 };
 
@@ -141,6 +119,8 @@ let escaneando = false;
 let animFrameId = null;
 
 // Referencias del DOM
+const customLogoImg = document.getElementById('customLogoImg');
+const defaultBlocksLogo = document.getElementById('defaultBlocksLogo');
 const scannerView = document.getElementById('scannerView');
 const resultView = document.getElementById('resultView');
 const qrVideo = document.getElementById('qrVideo');
@@ -154,12 +134,15 @@ const scanPill = document.getElementById('scanPill');
 const storageStatusBadge = document.getElementById('storageStatusBadge');
 
 const tableTabs = document.getElementById('tableTabs');
+const inlineTableSwitcher = document.getElementById('inlineTableSwitcher');
 const tableTitle = document.getElementById('tableTitle');
 const tableCounter = document.getElementById('tableCounter');
+const tableProgressBar = document.getElementById('tableProgressBar');
 const tableQrImg = document.getElementById('tableQrImg');
 const qrContainer = document.getElementById('qrContainer');
 const guestList = document.getElementById('guestList');
 const globalStats = document.getElementById('globalStats');
+const globalProgressBar = document.getElementById('globalProgressBar');
 const btnConfirmAllTable = document.getElementById('btnConfirmAllTable');
 const btnToggleAdd = document.getElementById('btnToggleAdd');
 const addGuestForm = document.getElementById('addGuestForm');
@@ -183,35 +166,78 @@ const btnExportBackup = document.getElementById('btnExportBackup');
 const importBackupInput = document.getElementById('importBackupInput');
 
 /* ==========================================================================
-   MOTOR DE PERSISTENCIA A PRUEBA DE FALLOS (LOCALSTORAGE + ESPEJO + INDEXEDDB)
+   CARGADOR INTELIGENTE DE LOGO (DETECTA CARPETA logo/ O icons/ Y .jpg O .png)
    ========================================================================== */
 
-// Valida que el objeto de mesas tenga estructura íntegra (mesas 1 a 10 y listas válidas)
-function esEstructuraValida(datos) {
-  if (!datos || typeof datos !== 'object') return false;
-  for (let i = 1; i <= 10; i++) {
-    if (!datos[i] || !Array.isArray(datos[i].invitados)) {
-      return false;
+function inicializarLogoPersonalizado() {
+  const rutasLogo = [
+    'logo/logo.jpg',
+    'logo/logo.png',
+    'icons/logo.jpg',
+    'icons/logo.png',
+    'img/logo.jpg',
+    'img/logo.png',
+    'logo.jpg',
+    'logo.png'
+  ];
+  let indice = 0;
+
+  customLogoImg.onload = () => {
+    customLogoImg.classList.remove('hidden');
+    defaultBlocksLogo.classList.add('hidden');
+  };
+
+  customLogoImg.onerror = () => {
+    indice++;
+    if (indice < rutasLogo.length) {
+      customLogoImg.src = rutasLogo[indice];
+    } else {
+      customLogoImg.classList.add('hidden');
+      defaultBlocksLogo.classList.remove('hidden');
     }
+  };
+
+  customLogoImg.src = rutasLogo[0];
+}
+
+/* ==========================================================================
+   MOTOR DE PERSISTENCIA A PRUEBA DE FALLOS (8 MESAS)
+   ========================================================================== */
+
+// Normaliza cualquier objeto de mesas (por ejemplo, respaldos anteriores de 10 mesas) a exactamente 8 mesas
+function normalizarAOchoMesas(datos) {
+  if (!datos || typeof datos !== 'object') return null;
+  const normalizado = {};
+  for (let i = 1; i <= TOTAL_MESAS; i++) {
+    if (!datos[i] || !Array.isArray(datos[i].invitados)) {
+      return null;
+    }
+    normalizado[i] = {
+      numero: i,
+      qr: `qr/${i}.png`,
+      invitados: datos[i].invitados
+    };
   }
-  return true;
+  return normalizado;
+}
+
+function esEstructuraValida(datos) {
+  return normalizarAOchoMesas(datos) !== null;
 }
 
 function cargarDatosConVerificacion() {
-  // 1. Intentar leer almacenamiento principal
+  // 1. Intentar leer almacenamiento principal de 8 mesas
   try {
-    const primario = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (esEstructuraValida(primario)) {
-      return primario;
-    }
+    const primario = normalizarAOchoMesas(JSON.parse(localStorage.getItem(STORAGE_KEY)));
+    if (primario) return primario;
   } catch (e) {
     console.warn('Fallo en almacenamiento primario, intentando espejo...', e);
   }
 
-  // 2. Si el primario falló o se corrompió, recuperar desde espejo (_backup)
+  // 2. Intentar espejo secundario
   try {
-    const espejo = JSON.parse(localStorage.getItem(STORAGE_BACKUP_KEY));
-    if (esEstructuraValida(espejo)) {
+    const espejo = normalizarAOchoMesas(JSON.parse(localStorage.getItem(STORAGE_BACKUP_KEY)));
+    if (espejo) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(espejo));
       return espejo;
     }
@@ -219,7 +245,17 @@ function cargarDatosConVerificacion() {
     console.warn('Fallo en espejo secundario:', e);
   }
 
-  // 3. Cargar valores por defecto y luego intentar restaurar desde IndexedDB
+  // 3. Migrar automáticamente datos de las mesas 1 a 8 si existía la versión anterior (v4)
+  try {
+    const legado = normalizarAOchoMesas(JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY)));
+    if (legado) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(legado));
+      localStorage.setItem(STORAGE_BACKUP_KEY, JSON.stringify(legado));
+      return legado;
+    }
+  } catch (_) {}
+
+  // 4. Cargar las 8 mesas por defecto
   return JSON.parse(JSON.stringify(MESAS_INICIALES));
 }
 
@@ -244,7 +280,7 @@ async function guardarEnIndexedDB(datos) {
   try {
     const db = await abrirBaseIndexedDB();
     const tx = db.transaction(IDB_STORE, 'readwrite');
-    tx.objectStore(IDB_STORE).put(datos, 'estado_actual');
+    tx.objectStore(IDB_STORE).put(datos, 'estado_actual_8mesas');
   } catch (err) {
     console.warn('No se pudo sincronizar en IndexedDB:', err);
   }
@@ -254,11 +290,10 @@ async function sincronizarDesdeIndexedDBAlIniciar() {
   try {
     const db = await abrirBaseIndexedDB();
     const tx = db.transaction(IDB_STORE, 'readonly');
-    const req = tx.objectStore(IDB_STORE).get('estado_actual');
+    const req = tx.objectStore(IDB_STORE).get('estado_actual_8mesas');
     req.onsuccess = () => {
-      const datosIdb = req.result;
-      if (esEstructuraValida(datosIdb)) {
-        // Si localStorage estaba vacío o recién reiniciado pero IndexedDB tenía asistencias guardadas, recupera IndexedDB
+      const datosIdb = normalizarAOchoMesas(req.result);
+      if (datosIdb) {
         const confirmadosLocal = contarConfirmadosTotales(estadoMesas);
         const confirmadosIdb = contarConfirmadosTotales(datosIdb);
         if (confirmadosIdb > confirmadosLocal) {
@@ -281,9 +316,10 @@ function contarConfirmadosTotales(mapaMesas) {
   return total;
 }
 
-// Guardado atómico en las 3 capas + retroalimentación visual
 function guardarDatosAPruebaDeFallos(mostrarNotificacion = true) {
-  if (!esEstructuraValida(estadoMesas)) return;
+  const normalizado = normalizarAOchoMesas(estadoMesas);
+  if (!normalizado) return;
+  estadoMesas = normalizado;
 
   const serializado = JSON.stringify(estadoMesas);
   try {
@@ -311,7 +347,6 @@ function mostrarToast(texto) {
   }, 2200);
 }
 
-// Solicitar al sistema operativo (iOS / Android) que nunca borre el almacenamiento offline
 if (navigator.storage && navigator.storage.persist) {
   navigator.storage.persist().then((concedido) => {
     if (concedido) {
@@ -320,7 +355,6 @@ if (navigator.storage && navigator.storage.persist) {
   });
 }
 
-// Salvaguarda automática cuando el usuario bloquea el celular o minimiza Safari/Chrome
 window.addEventListener('pagehide', () => guardarDatosAPruebaDeFallos(false));
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') {
@@ -368,7 +402,6 @@ function solicitarConfirmacionInvitado(numMesa, invitado) {
   confirmModal.classList.remove('hidden');
 }
 
-// Confirmar a todos los invitados de la mesa actual con diálogo de confirmación
 btnConfirmAllTable.addEventListener('click', () => {
   const datosMesa = estadoMesas[mesaActual];
   const faltantes = datosMesa.invitados.filter((i) => !i.presente);
@@ -421,7 +454,7 @@ confirmModal.addEventListener('click', (e) => {
 });
 
 /* ==========================================================================
-   LECTURA Y MAPEO DE CÓDIGOS QR (qr/1.png a qr/10.png)
+   LECTURA Y MAPEO DE CÓDIGOS QR (CARPETA qr/ DEL 1 AL 8)
    ========================================================================== */
 
 function cargarMapaQr() {
@@ -439,7 +472,13 @@ function guardarMapaQr() {
 }
 
 function configurarImagenQr(imgElement, numMesa) {
-  const rutasAlternativas = [`qr/${numMesa}.png`, `${numMesa}.png`, `resultado/${numMesa}.png`];
+  const rutasAlternativas = [
+    `qr/${numMesa}.png`,
+    `qr/${numMesa}.jpg`,
+    `qr/${numMesa}.jpeg`,
+    `resultado/${numMesa}.png`,
+    `${numMesa}.png`
+  ];
   let intento = 0;
 
   imgElement.onerror = function () {
@@ -457,8 +496,8 @@ async function indexarImagenesQrLocales() {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-  for (let num = 1; num <= 10; num++) {
-    const rutas = [`qr/${num}.png`, `${num}.png`];
+  for (let num = 1; num <= TOTAL_MESAS; num++) {
+    const rutas = [`qr/${num}.png`, `qr/${num}.jpg`, `resultado/${num}.png`, `${num}.png`];
     for (const ruta of rutas) {
       try {
         const textoDecodificado = await decodificarImagenUrl(ruta, canvas, ctx);
@@ -494,19 +533,20 @@ function resolverMesaDesdeTextoQr(textoRaw) {
   const limpio = textoRaw.trim();
 
   if (mapaQrMesas[limpio]) {
-    return Number(mapaQrMesas[limpio]);
+    const mapeada = Number(mapaQrMesas[limpio]);
+    if (mapeada >= 1 && mapeada <= TOTAL_MESAS) return mapeada;
   }
 
-  if (/^(10|[1-9])$/.test(limpio)) {
+  if (/^[1-8]$/.test(limpio)) {
     return Number(limpio);
   }
 
-  const matchEspecifico = limpio.match(/(?:mesa|resultado|qr|table|id|m)[\s\/=:_#-]*0*(10|[1-9])(?:\.png|\b|$)/i);
+  const matchEspecifico = limpio.match(/(?:mesa|resultado|qr|table|id|m)[\s\/=:_#-]*0*([1-8])(?:\.(?:png|jpg|jpeg)|\b|$)/i);
   if (matchEspecifico) {
     return Number(matchEspecifico[1]);
   }
 
-  const matchNumero = limpio.match(/(?:^|\D)0*(10|[1-9])(?:\D|$)/);
+  const matchNumero = limpio.match(/(?:^|\D)0*([1-8])(?:\D|$)/);
   if (matchNumero) {
     return Number(matchNumero[1]);
   }
@@ -539,11 +579,11 @@ function procesarQrDetectado(textoQr) {
 
   if (!numMesa) {
     const respuesta = prompt(
-      `Código QR detectado: "${textoQr}"\n\n¿A qué número de mesa (1 al 10) pertenece este QR?`,
+      `Código QR detectado: "${textoQr}"\n\n¿A qué número de mesa (1 al 8) pertenece este QR?`,
       '1'
     );
     const numUsuario = Number(respuesta);
-    if (numUsuario >= 1 && numUsuario <= 10) {
+    if (numUsuario >= 1 && numUsuario <= TOTAL_MESAS) {
       mapaQrMesas[textoQr.trim()] = numUsuario;
       guardarMapaQr();
       numMesa = numUsuario;
@@ -572,7 +612,7 @@ function abrirMesa(numMesa, desdeQr = false) {
 function volverAlEscaner() {
   resultView.classList.add('hidden');
   scannerView.classList.remove('hidden');
-  iniciarCamara();
+  renderizarTodo();
 }
 
 async function iniciarCamara() {
@@ -601,7 +641,7 @@ async function iniciarCamara() {
     escanearCuadroVideo();
   } catch (err) {
     console.warn('Cámara directa no disponible:', err);
-    cameraStatusText.textContent = 'Sin permiso de cámara en vivo. Usa "Escanear con Cámara Nativa / Foto" abajo.';
+    cameraStatusText.textContent = 'Sin permiso en vivo. Usa "Escanear con Cámara Nativa / Foto" abajo.';
   }
 }
 
@@ -617,7 +657,7 @@ function detenerCamara() {
   }
   qrVideo.srcObject = null;
   cameraPlaceholder.classList.remove('hidden');
-  cameraStatusText.textContent = 'Presiona "Iniciar Cámara" para escanear el código QR';
+  cameraStatusText.textContent = 'Presiona "Iniciar Cámara QR" para escanear';
   btnToggleCamera.textContent = '📷 Iniciar Cámara QR';
 }
 
@@ -665,7 +705,7 @@ qrFileInput.addEventListener('change', (e) => {
         if (code && code.data) {
           procesarQrDetectado(code.data);
         } else {
-          alert('No se detectó un código QR válido en la foto. Intenta acercar más la cámara.');
+          alert('No se detectó un código QR válido en la imagen. Intenta acercar más la cámara.');
         }
       }
     };
@@ -683,25 +723,50 @@ btnToggleCamera.addEventListener('click', () => {
   }
 });
 
-btnBackToScan.addEventListener('click', volverAlEscaner);
+btnBackToScan.addEventListener('click', () => {
+  detenerCamara();
+  volverAlEscaner();
+});
 
 /* ==========================================================================
-   RENDERIZADO DE MESAS E INVITADOS
+   RENDERIZADO DE LAS 8 MESAS E INVITADOS
    ========================================================================== */
 
 function renderizarPestanas() {
   tableTabs.innerHTML = '';
-  Object.keys(estadoMesas).forEach((num) => {
+  inlineTableSwitcher.innerHTML = '';
+
+  for (let num = 1; num <= TOTAL_MESAS; num++) {
+    const mesa = estadoMesas[num];
+    const presentes = mesa.invitados.filter((i) => i.presente).length;
+    const total = mesa.invitados.length;
+    const completa = total > 0 && presentes === total;
+
+    // Botón en la cuadrícula principal (4x2)
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'tab-btn';
-    btn.textContent = `Mesa ${num}`;
+    btn.className = `tab-btn ${completa ? 'table-complete' : ''}`;
+    btn.innerHTML = `
+      <span class="tab-btn-title">Mesa ${num}</span>
+      <span class="tab-btn-count">${completa ? '✓ ' : ''}${presentes}/${total}</span>
+    `;
     btn.addEventListener('click', () => {
       detenerCamara();
-      abrirMesa(Number(num), false);
+      abrirMesa(num, false);
     });
     tableTabs.appendChild(btn);
-  });
+
+    // Pastilla rápida en la vista de detalle (1 a 8)
+    const miniBtn = document.createElement('button');
+    miniBtn.type = 'button';
+    miniBtn.className = `mini-table-pill ${num === mesaActual ? 'active' : ''} ${completa ? 'done' : ''}`;
+    miniBtn.textContent = `M${num}`;
+    miniBtn.title = `Ir a Mesa ${num} (${presentes}/${total})`;
+    miniBtn.addEventListener('click', () => {
+      abrirMesa(num, false);
+    });
+    inlineTableSwitcher.appendChild(miniBtn);
+  }
 }
 
 function renderizarMesaActual() {
@@ -711,6 +776,9 @@ function renderizarMesaActual() {
   const presentes = datosMesa.invitados.filter((i) => i.presente).length;
   const total = datosMesa.invitados.length;
   tableCounter.textContent = `${presentes} de ${total} confirmados`;
+
+  const porcentajeMesa = total > 0 ? Math.round((presentes / total) * 100) : 0;
+  tableProgressBar.style.width = `${porcentajeMesa}%`;
 
   configurarImagenQr(tableQrImg, mesaActual);
 
@@ -749,7 +817,6 @@ function renderizarMesaActual() {
     leftDiv.appendChild(infoDiv);
     li.appendChild(leftDiv);
 
-    // Al tocar el invitado pide confirmación antes de marcar o desmarcar
     leftDiv.addEventListener('click', () => {
       solicitarConfirmacionInvitado(mesaActual, invitado);
     });
@@ -783,7 +850,9 @@ function renderizarEstadisticasGlobales() {
     totalPresentes += mesa.invitados.filter((i) => i.presente).length;
   });
 
-  globalStats.textContent = `${totalPresentes} / ${totalInvitados} invitados confirmados`;
+  globalStats.textContent = `${totalPresentes} / ${totalInvitados} confirmados`;
+  const porcentajeGlobal = totalInvitados > 0 ? Math.round((totalPresentes / totalInvitados) * 100) : 0;
+  globalProgressBar.style.width = `${porcentajeGlobal}%`;
 }
 
 function renderizarTodo() {
@@ -819,7 +888,7 @@ addGuestForm.addEventListener('submit', (e) => {
   renderizarTodo();
 });
 
-// Buscador de invitados: abre su mesa y permite confirmar directamente al invitado buscado
+// Buscador de invitados y mesas (1 a 8)
 searchInput.addEventListener('input', () => {
   const query = searchInput.value.trim().toLowerCase();
   if (!query) {
@@ -833,7 +902,7 @@ searchInput.addEventListener('input', () => {
       coincidencias.push({
         mesa: mesa.numero,
         invitado: null,
-        texto: `Ir a Mesa ${mesa.numero}`,
+        texto: `📍 Ir a Mesa ${mesa.numero}`,
         estado: `${mesa.invitados.filter((i) => i.presente).length}/${mesa.invitados.length}`
       });
     }
@@ -866,7 +935,6 @@ searchInput.addEventListener('input', () => {
         searchResults.classList.add('hidden');
         detenerCamara();
         abrirMesa(item.mesa, false);
-        // Si tocó a un invitado en el buscador, abre también la ventana para confirmar su llegada
         if (item.invitado) {
           solicitarConfirmacionInvitado(item.mesa, item.invitado);
         }
@@ -879,7 +947,7 @@ searchInput.addEventListener('input', () => {
 });
 
 /* ==========================================================================
-   EXPORTAR E IMPORTAR RESPALDO MANUAL (A PRUEBA DE CAMBIO DE DISPOSITIVO)
+   EXPORTAR E IMPORTAR RESPALDO MANUAL
    ========================================================================== */
 
 btnExportBackup.addEventListener('click', () => {
@@ -888,7 +956,7 @@ btnExportBackup.addEventListener('click', () => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `respaldo-mesas-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `respaldo-ximbal-8mesas-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
   mostrarToast('💾 Archivo de respaldo descargado');
@@ -901,14 +969,14 @@ importBackupInput.addEventListener('change', (e) => {
   const reader = new FileReader();
   reader.onload = () => {
     try {
-      const importado = JSON.parse(reader.result);
-      if (esEstructuraValida(importado)) {
+      const importado = normalizarAOchoMesas(JSON.parse(reader.result));
+      if (importado) {
         estadoMesas = importado;
         guardarDatosAPruebaDeFallos(true);
         renderizarTodo();
         mostrarToast('✅ Respaldo restaurado con éxito');
       } else {
-        alert('El archivo seleccionado no tiene un formato válido de mesas.');
+        alert('El archivo seleccionado no tiene un formato válido para las 8 mesas.');
       }
     } catch (_) {
       alert('No se pudo leer el archivo de respaldo.');
@@ -938,12 +1006,11 @@ function verificarParametroUrl() {
   const params = new URLSearchParams(window.location.search);
   const mesaParam = params.get('mesa') || window.location.hash.replace(/\D/g, '');
   const num = Number(mesaParam);
-  if (num >= 1 && num <= 10) {
+  if (num >= 1 && num <= TOTAL_MESAS) {
     abrirMesa(num, true);
   }
 }
 
-// Registro del Service Worker para funcionamiento 100% offline en iOS y Android
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').catch((err) => {
@@ -953,6 +1020,7 @@ if ('serviceWorker' in navigator) {
 }
 
 // Inicialización completa
+inicializarLogoPersonalizado();
 renderizarTodo();
 sincronizarDesdeIndexedDBAlIniciar();
 indexarImagenesQrLocales();

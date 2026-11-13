@@ -9,11 +9,11 @@
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#4B6A2F" />
 
-  <!-- Configuración estricta para iOS (Safari Offline / Agregar a pantalla de inicio) -->
+  <!-- Configuración para iOS (Safari Offline / Agregar a pantalla de inicio) -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Ximbal" />
-  <link rel="apple-touch-icon" href="icons/logo.png" />
+  <link rel="apple-touch-icon" href="logo/logo.jpg" />
 
   <link rel="stylesheet" href="style.css" />
   <!-- Librería jsQR para lectura de QR en iOS y Android (cacheada en sw.js) -->
@@ -21,52 +21,76 @@
 </head>
 <body>
   <div class="app-wrapper">
-    <!-- ENCABEZADO ORIGINAL CON LOGO Y TÍTULO -->
+    <!-- ENCABEZADO CON LOGO Y PROGRESO GLOBAL -->
     <header class="brand-header">
-      <div class="brand-left">
-        <img 
-          src="icons/logo.png" 
-          alt="Logo" 
-          class="custom-logo hidden" 
-          id="customLogoImg"
-          onload="this.classList.remove('hidden'); document.getElementById('defaultBlocksLogo').classList.add('hidden');"
-          onerror="this.classList.add('hidden');"
-        />
-        <div class="blocks-logo" id="defaultBlocksLogo" aria-label="Logo original">
-          <span class="block-item block-red"></span>
-          <span class="block-item block-blue"></span>
-          <span class="block-item block-mint"></span>
+      <div class="brand-top-row">
+        <div class="brand-left">
+          <img 
+            src="logo/logo.jpg" 
+            alt="Logo Ximbal" 
+            class="custom-logo hidden" 
+            id="customLogoImg"
+          />
+          <div class="blocks-logo" id="defaultBlocksLogo" aria-label="Logo Ximbal">
+            <span class="block-item block-red"></span>
+            <span class="block-item block-blue"></span>
+            <span class="block-item block-mint"></span>
+          </div>
+          <div class="brand-titles">
+            <h1 class="brand-title">XIMBAL</h1>
+            <span class="brand-tagline">Donde el territorio se vuelve sabor</span>
+          </div>
         </div>
-        <div class="brand-titles">
-          <h1 class="brand-title">XIMBAL</h1>
-          <span class="brand-subtitle" id="globalStats">0 / 0 invitados confirmados</span>
+        <div class="offline-pill" id="storageStatusBadge" title="Estado de memoria a prueba de fallos">
+          🛡️ Guardado Seguro
         </div>
       </div>
-      <div class="offline-pill" id="storageStatusBadge" title="Estado de memoria a prueba de fallos">
-        🛡️ Guardado Seguro
+
+      <!-- Barra de resumen global de asistencia -->
+      <div class="global-progress-card">
+        <div class="global-progress-info">
+          <span class="global-progress-label">Asistencia Total (8 Mesas)</span>
+          <span class="brand-subtitle" id="globalStats">0 / 0 confirmados</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="globalProgressBar" style="width: 0%"></div>
+        </div>
       </div>
     </header>
 
-    <!-- TARJETA BLANCA PRINCIPAL (TEMA ORIGINAL) -->
+    <!-- TARJETA PRINCIPAL -->
     <main class="main-white-card">
-      <!-- Buscador rápido en la parte superior de la tarjeta -->
+      <!-- Buscador rápido en la parte superior -->
       <div class="search-bar-wrapper">
+        <span class="search-icon-prefix">🔍</span>
         <input 
           type="search" 
           id="searchInput" 
-          placeholder="🔍 Buscar invitado o número de mesa..." 
+          placeholder="Buscar invitado o mesa (1 a 8)..." 
           autocomplete="off"
         />
         <div class="search-results hidden" id="searchResults"></div>
       </div>
 
-      <!-- VISTA 1: ESCÁNER DE CÓDIGO QR -->
+      <!-- VISTA 1: ESCÁNER DE CÓDIGO QR Y SELECTOR DE 8 MESAS -->
       <section id="scannerView" class="scanner-section">
+        <!-- Acceso directo e intuitivo a las 8 mesas arriba para uso rápido -->
+        <div class="quick-tables-box">
+          <div class="section-header-row">
+            <span class="quick-tables-title">Selecciona una mesa (1 - 8)</span>
+            <span class="quick-tables-hint">Toca para abrir</span>
+          </div>
+          <nav class="table-tabs" id="tableTabs" aria-label="Selector de 8 mesas"></nav>
+        </div>
+
+        <div class="divider-line"></div>
+
+        <!-- Encabezado del Escáner -->
         <div class="orange-header-box scanner-title-box">
           <div class="header-text-side">
-            <span class="table-label">ESCÁNER ACTIVO</span>
-            <h2>Código QR</h2>
-            <p class="table-counter">Escanea el QR para abrir su mesa</p>
+            <span class="table-label">LECTOR ÓPTICO</span>
+            <h2>Escáner QR</h2>
+            <p class="table-counter">Apunta al código QR de la mesa</p>
           </div>
           <div class="scanner-icon-badge">📷</div>
         </div>
@@ -78,8 +102,8 @@
             <div class="scan-target-box"></div>
           </div>
           <div class="camera-placeholder" id="cameraPlaceholder">
-            <span class="cam-emoji">📷</span>
-            <p id="cameraStatusText">Presiona "Iniciar Cámara" para escanear el código QR</p>
+            <div class="cam-circle-icon">📷</div>
+            <p id="cameraStatusText">Presiona "Iniciar Cámara QR" para escanear</p>
           </div>
         </div>
 
@@ -103,12 +127,6 @@
           />
         </div>
 
-        <!-- Botones de acceso directo a las 10 mesas -->
-        <div class="quick-tables-box">
-          <p class="quick-tables-title">O selecciona una mesa directamente:</p>
-          <nav class="table-tabs" id="tableTabs" aria-label="Selector de mesas"></nav>
-        </div>
-
         <!-- Herramientas de Respaldo a Prueba de Fallos -->
         <div class="backup-tools">
           <button type="button" class="btn-backup" id="btnExportBackup">
@@ -121,28 +139,35 @@
         </div>
       </section>
 
-      <!-- VISTA 2: RESULTADO DE LA MESA (ENCABEZADO NARANJA + QR Y LISTA DE INVITADOS) -->
+      <!-- VISTA 2: RESULTADO DE LA MESA (DETALLE Y LISTA DE INVITADOS) -->
       <section id="resultView" class="result-section hidden">
         <div class="result-top-bar">
           <button type="button" class="btn-return-scan" id="btnBackToScan">
-            ← Escanear otro QR
+            ← Escáner / Inicio
           </button>
           <span class="scan-status-tag" id="scanPill">✅ Mesa Cargada</span>
         </div>
 
-        <!-- Recuadro Naranja: Encabezado de Número de Mesa + QR al lado -->
-        <div class="orange-header-box">
+        <!-- Barra rápida para cambiar entre las 8 mesas sin salir -->
+        <div class="inline-table-switcher" id="inlineTableSwitcher" aria-label="Cambio rápido de mesa"></div>
+
+        <!-- Recuadro de Número de Mesa + QR al lado -->
+        <div class="orange-header-box table-detail-header">
           <div class="header-text-side">
-            <span class="table-label">ASIGNACIÓN</span>
+            <span class="table-label">CONTROL DE ASISTENCIA</span>
             <h2 id="tableTitle">Mesa 1</h2>
-            <p class="table-counter" id="tableCounter">0 de 0 presentes</p>
+            <p class="table-counter" id="tableCounter">0 de 0 confirmados</p>
+            <div class="table-mini-progress">
+              <div class="table-mini-fill" id="tableProgressBar" style="width: 0%"></div>
+            </div>
           </div>
           <div class="header-qr-side" id="qrContainer" title="Toca para ampliar el código QR">
             <img id="tableQrImg" src="qr/1.png" alt="Código QR de la mesa" />
+            <span class="qr-zoom-hint">🔍 Ampliar</span>
           </div>
         </div>
 
-        <!-- Lista de invitados de la mesa para palomear con confirmación -->
+        <!-- Lista de invitados de la mesa para confirmar -->
         <div class="guest-list-container">
           <div class="guest-list-toolbar">
             <span class="guest-list-label">Invitados de la mesa</span>
@@ -161,19 +186,19 @@
             <input 
               type="text" 
               id="newGuestName" 
-              placeholder="Escribe el nombre del invitado..." 
+              placeholder="Nombre del nuevo invitado..." 
               required 
             />
-            <button type="submit" class="btn-save-guest">Guardar</button>
+            <button type="submit" class="btn-save-guest">Agregar</button>
           </form>
 
-          <!-- Lista con círculos verdes y palomitas verdes idéntica al boceto -->
+          <!-- Lista interactiva de invitados -->
           <ul class="guest-list" id="guestList"></ul>
         </div>
       </section>
     </main>
 
-    <!-- MODAL DE DOBLE CONFIRMACIÓN AL PALOMEAR INVITADO O MESA -->
+    <!-- MODAL DE DOBLE CONFIRMACIÓN AL MARCAR INVITADO O MESA -->
     <div class="confirm-modal hidden" id="confirmModal" role="dialog" aria-modal="true">
       <div class="confirm-modal-card">
         <div class="confirm-icon" id="confirmModalIcon">✅</div>
@@ -193,14 +218,17 @@
     <!-- MODAL PARA VER EL CÓDIGO QR EN GRANDE -->
     <div class="qr-modal hidden" id="qrModal">
       <div class="qr-modal-card">
+        <span class="modal-subtitle">CÓDIGO QR OFICIAL</span>
         <h3 id="modalTableTitle">Mesa 1</h3>
-        <img id="modalQrImg" src="" alt="Código QR Ampliado" />
-        <button type="button" class="btn-close-modal" id="btnCloseModal">Cerrar</button>
+        <div class="qr-modal-img-wrapper">
+          <img id="modalQrImg" src="" alt="Código QR Ampliado" />
+        </div>
+        <button type="button" class="btn-close-modal" id="btnCloseModal">Cerrar vista</button>
       </div>
     </div>
 
     <!-- AVISO FLOTANTE DE GUARDADO (TOAST) -->
-    <div class="save-toast hidden" id="saveToast">✅ Guardado en memoria segura</div>
+    <div class="save-toast hidden" id="saveToast">🛡️ Guardado en memoria segura</div>
   </div>
 
   <script src="app.js"></script>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ximbal-mesas-v2';
+const CACHE_NAME = 'ximbal-8mesas-v3';
 
 const ASSETS_TO_CACHE = [
   './',
@@ -6,6 +6,9 @@ const ASSETS_TO_CACHE = [
   './style.css',
   './app.js',
   './manifest.json',
+  './logo/logo.jpg',
+  './logo/logo.png',
+  './icons/logo.jpg',
   './icons/logo.png',
   'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js',
   './qr/1.png',
@@ -16,16 +19,14 @@ const ASSETS_TO_CACHE = [
   './qr/6.png',
   './qr/7.png',
   './qr/8.png',
-  './qr/9.png',
-  './qr/10.png',
-  './resultado/1.png',
-  './resultado/2.png',
-  './resultado/3.png',
-  './resultado/4.png',
-  './resultado/5.png',
-  './resultado/6.png',
-  './resultado/7.png',
-  './resultado/8.png'
+  './qr/1.jpg',
+  './qr/2.jpg',
+  './qr/3.jpg',
+  './qr/4.jpg',
+  './qr/5.jpg',
+  './qr/6.jpg',
+  './qr/7.jpg',
+  './qr/8.jpg'
 ];
 
 self.addEventListener('install', (event) => {
