@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mesas-qr-v1-theme-failsafe-v5';
+const CACHE_NAME = 'ximbal-mesas-v2';
 
 const ASSETS_TO_CACHE = [
   './',
@@ -6,7 +6,7 @@ const ASSETS_TO_CACHE = [
   './style.css',
   './app.js',
   './manifest.json',
-  './logo.png',
+  './icons/logo.png',
   'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js',
   './qr/1.png',
   './qr/2.png',
@@ -17,7 +17,15 @@ const ASSETS_TO_CACHE = [
   './qr/7.png',
   './qr/8.png',
   './qr/9.png',
-  './qr/10.png'
+  './qr/10.png',
+  './resultado/1.png',
+  './resultado/2.png',
+  './resultado/3.png',
+  './resultado/4.png',
+  './resultado/5.png',
+  './resultado/6.png',
+  './resultado/7.png',
+  './resultado/8.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -35,28 +43,31 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
+        keys
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
       )
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((networkResponse) => {
-        return caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, networkResponse.clone());
-          return networkResponse;
-        });
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+
+      return fetch(event.request).then((response) => {
+        if (response.ok && event.request.method === 'GET') {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, clone);
+          });
+        }
+        return response;
+      }).catch(() => {
+        if (event.request.mode === 'navigate') {
+          return caches.match('./index.html');
+        }
       });
     })
   );

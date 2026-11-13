@@ -1,18 +1,33 @@
 :root {
-  --bg-mint: #62c3a6;
-  --bg-mint-dark: #4aa388;
+  /* ═══ Paleta Material 3 — Tema Ximbal (idéntica a la app Android) ═══ */
+  --primary: #4B6A2F;
+  /* Olive Green */
+  --primary-container: #CCF0A8;
+  --on-primary: #FFFFFF;
+  --secondary: #855318;
+  /* Terracotta */
+  --secondary-container: #FFDCBE;
+  --tertiary: #6F5B0E;
+  /* Gold */
+  --tertiary-container: #FBDF88;
+  --surface: #FFF8F2;
+  /* Warm Cream */
+  --on-surface: #1D1B16;
+  --on-surface-variant: #46483C;
+  --surface-container: #F4EDE4;
+  --surface-container-high: #EEE8DF;
+  --outline: #77786B;
+  --outline-variant: #C6C7B8;
+  --cream-bg: #F5EBD9;
+  --error: #BA1A1A;
+  --error-container: #FFDAD6;
   --card-white: #ffffff;
-  --orange-border: #f59e2d;
-  --block-red: #e06b5f;
-  --block-blue: #7ab5e6;
-  --block-mint: #6ec4a9;
-  --check-green-top: #35df35;
-  --check-green-bottom: #19b319;
-  --check-green-border: #138a13;
-  --circle-stroke: #63c2a8;
-  --text-main: #111827;
-  --text-secondary: #6b7280;
-  --danger-red: #dc2626;
+  --check-green-top: #6BBF59;
+  --check-green-bottom: #4B6A2F;
+  --check-green-border: #3A5424;
+  --text-main: #1D1B16;
+  --text-secondary: #46483C;
+  --danger-red: #BA1A1A;
 }
 
 * {
@@ -24,7 +39,7 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background-color: var(--bg-mint);
+  background-color: var(--cream-bg);
   color: var(--text-main);
   min-height: 100vh;
   padding: env(safe-area-inset-top) 14px env(safe-area-inset-bottom) 14px;
@@ -65,10 +80,10 @@ body {
 
 .blocks-logo {
   display: inline-flex;
-  border: 2.5px solid #1f2937;
+  border: 2.5px solid var(--on-surface);
   border-radius: 6px;
   overflow: hidden;
-  background: #1f2937;
+  background: var(--on-surface);
   gap: 2px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
   flex-shrink: 0;
@@ -81,15 +96,15 @@ body {
 }
 
 .block-red {
-  background-color: var(--block-red);
+  background-color: var(--secondary);
 }
 
 .block-blue {
-  background-color: var(--block-blue);
+  background-color: var(--tertiary);
 }
 
 .block-mint {
-  background-color: var(--block-mint);
+  background-color: var(--primary);
 }
 
 .brand-titles {
@@ -101,20 +116,20 @@ body {
   font-size: 1.15rem;
   font-weight: 900;
   letter-spacing: 0.03em;
-  color: #111827;
+  color: var(--on-surface);
   line-height: 1.1;
 }
 
 .brand-subtitle {
   font-size: 0.8rem;
   font-weight: 700;
-  color: rgba(17, 24, 39, 0.75);
+  color: var(--on-surface-variant);
 }
 
 .offline-pill {
-  background: rgba(255, 255, 255, 0.4);
-  border: 1.5px solid rgba(17, 24, 39, 0.2);
-  color: #111827;
+  background: var(--primary-container);
+  border: 1.5px solid var(--primary);
+  color: var(--on-surface);
   font-size: 0.75rem;
   font-weight: 800;
   padding: 5px 10px;
@@ -152,7 +167,7 @@ body {
 }
 
 .search-bar-wrapper input:focus {
-  border-color: var(--bg-mint);
+  border-color: var(--primary);
   background: #ffffff;
 }
 
@@ -162,7 +177,7 @@ body {
   left: 0;
   right: 0;
   background: #ffffff;
-  border: 2px solid var(--bg-mint);
+  border: 2px solid var(--primary);
   border-radius: 14px;
   padding: 8px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
@@ -187,7 +202,7 @@ body {
 }
 
 .search-result-badge {
-  background: var(--orange-border);
+  background: var(--secondary);
   color: #ffffff;
   font-weight: 800;
   font-size: 0.78rem;
@@ -197,7 +212,7 @@ body {
 
 /* RECUADRO NARANJA ESTILO BOCETO (ENCABEZADO DE MESA + QR AL LADO) */
 .orange-header-box {
-  border: 3.5px solid var(--orange-border);
+  border: 3.5px solid var(--secondary);
   border-radius: 14px;
   padding: 16px 18px;
   display: flex;
@@ -217,7 +232,7 @@ body {
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.08em;
-  color: var(--orange-border);
+  color: var(--secondary);
   text-transform: uppercase;
 }
 
@@ -256,14 +271,14 @@ body {
 
 .scanner-icon-badge {
   font-size: 2.2rem;
-  background: #fff7ed;
+  background: var(--secondary-container);
   width: 64px;
   height: 64px;
   border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #fed7aa;
+  border: 2px solid var(--secondary);
 }
 
 /* SECCIÓN ESCÁNER */
@@ -282,7 +297,7 @@ body {
   background: #111827;
   border-radius: 18px;
   overflow: hidden;
-  border: 3px solid var(--bg-mint);
+  border: 3px solid var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -306,7 +321,7 @@ body {
 .scan-target-box {
   width: 64%;
   height: 64%;
-  border: 3px dashed var(--orange-border);
+  border: 3px dashed var(--secondary);
   border-radius: 16px;
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
 }
@@ -346,21 +361,21 @@ body {
   padding: 13px;
   border-radius: 12px;
   border: none;
-  background: var(--orange-border);
+  background: var(--secondary);
   color: #ffffff;
   font-size: 1rem;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(245, 158, 45, 0.3);
+  box-shadow: 0 4px 10px rgba(133, 83, 24, 0.3);
 }
 
 .btn-alt-action {
   width: 100%;
   padding: 11px;
   border-radius: 12px;
-  border: 2px solid var(--bg-mint);
-  background: #f0fdf9;
-  color: var(--bg-mint-dark);
+  border: 2px solid var(--primary);
+  background: var(--primary-container);
+  color: var(--primary);
   font-size: 0.92rem;
   font-weight: 700;
   text-align: center;
@@ -401,7 +416,7 @@ body {
 }
 
 .tab-btn:active {
-  background: var(--bg-mint);
+  background: var(--primary);
   color: #ffffff;
 }
 
@@ -435,8 +450,8 @@ body {
 }
 
 .btn-return-scan {
-  background: var(--bg-mint);
-  color: #ffffff;
+  background: var(--primary);
+  color: var(--on-primary);
   border: none;
   padding: 9px 14px;
   border-radius: 10px;
@@ -446,8 +461,8 @@ body {
 }
 
 .scan-status-tag {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--primary-container);
+  color: #0E2000;
   font-size: 0.8rem;
   font-weight: 700;
   padding: 5px 10px;
@@ -483,9 +498,9 @@ body {
 }
 
 .btn-confirm-all {
-  background: #ecfdf5;
-  border: 1.5px solid var(--bg-mint);
-  color: #065f46;
+  background: var(--primary-container);
+  border: 1.5px solid var(--primary);
+  color: #0E2000;
   font-weight: 800;
   font-size: 0.78rem;
   padding: 6px 10px;
@@ -496,7 +511,7 @@ body {
 .btn-edit-guests {
   background: #f3f4f6;
   border: none;
-  color: var(--bg-mint-dark);
+  color: var(--secondary);
   font-weight: 700;
   font-size: 0.82rem;
   padding: 6px 10px;
@@ -519,11 +534,11 @@ body {
 }
 
 .add-guest-form input:focus {
-  border-color: var(--bg-mint);
+  border-color: var(--primary);
 }
 
 .btn-save-guest {
-  background: var(--bg-mint);
+  background: var(--primary);
   color: #ffffff;
   border: none;
   padding: 0 16px;
@@ -556,7 +571,7 @@ body {
 }
 
 .guest-item.checked {
-  background-color: #f0fdf4;
+  background-color: var(--primary-container);
 }
 
 .guest-left {
@@ -571,7 +586,7 @@ body {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  border: 2.5px solid var(--circle-stroke);
+  border: 2.5px solid var(--primary);
   background: #ffffff;
   display: flex;
   align-items: center;
@@ -617,13 +632,13 @@ body {
 
 .guest-item.checked .guest-name {
   font-weight: 700;
-  color: #065f46;
+  color: #0E2000;
 }
 
 .guest-time {
   font-size: 0.76rem;
   font-weight: 600;
-  color: #059669;
+  color: var(--primary);
 }
 
 .btn-delete-guest {
@@ -661,7 +676,7 @@ body {
   align-items: center;
   gap: 14px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
-  border: 3px solid var(--orange-border);
+  border: 3px solid var(--secondary);
 }
 
 .confirm-icon {
@@ -703,19 +718,19 @@ body {
 .btn-confirm-accept {
   flex: 1.2;
   padding: 12px;
-  background: var(--check-green-bottom);
-  color: #ffffff;
+  background: var(--primary);
+  color: var(--on-primary);
   border: none;
   border-radius: 12px;
   font-size: 0.95rem;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(25, 179, 25, 0.3);
+  box-shadow: 0 4px 10px rgba(75, 106, 47, 0.3);
 }
 
 .btn-confirm-accept.uncheck-mode {
-  background: var(--danger-red);
-  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);
+  background: var(--error);
+  box-shadow: 0 4px 10px rgba(186, 26, 26, 0.3);
 }
 
 .qr-modal-card img {
@@ -727,7 +742,7 @@ body {
 .btn-close-modal {
   width: 100%;
   padding: 12px;
-  background: var(--bg-mint);
+  background: var(--primary);
   color: #ffffff;
   border: none;
   border-radius: 12px;
@@ -742,8 +757,8 @@ body {
   bottom: 22px;
   left: 50%;
   transform: translateX(-50%);
-  background: #065f46;
-  color: #ffffff;
+  background: #0E2000;
+  color: var(--primary-container);
   padding: 10px 18px;
   border-radius: 999px;
   font-size: 0.88rem;
