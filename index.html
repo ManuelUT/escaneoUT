@@ -1,107 +1,208 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#F5EBD9">
-    <title>Ximbal</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Escáner QR - Control de Mesas</title>
 
-    <!-- PWA / iOS -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Ximbal">
-    <link rel="apple-touch-icon" href="icons/logo.png">
+  <!-- Configuración PWA para Android y navegadores estándar -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#62c3a6" />
 
-    <link rel="stylesheet" href="style.css">
+  <!-- Configuración estricta para iOS (Safari Offline / Agregar a pantalla de inicio) -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Mesas QR" />
+  <link rel="apple-touch-icon" href="qr/1.png" />
+
+  <link rel="stylesheet" href="style.css" />
+  <!-- Librería jsQR para lectura de QR en iOS y Android (cacheada en sw.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 </head>
 <body>
-    <!-- ═══ Pantalla de Bienvenida ═══ -->
-    <div id="welcomeScreen" class="screen active">
-        <img id="imgLogo" src="icons/logo.png" alt="Logo de Ximbal" class="logo">
-        <button id="btnEscanear" class="btn-primary">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3 11h2V9H3v2zm0-4h2V5h2V3H3v4zm4 12H5v-2H3v4h4v-2zm10-12h2v2h2V7h-4v4h2V9zm-2 12v-2h2v-2h2v4h-4zm2-16V3h-4v2h2v2h2zM3 15h2v-2H3v2zm16 0h2v-2h-2v2zM5 5h6v6H5V5zm2 2v2h2V7H7zm6-2h6v6h-6V5zm2 2v2h2V7h-2zM5 13h6v6H5v-6zm2 2v2h2v-2H7zm6 0h2v2h-2v-2zm4 2h2v-2h-2v2zm-4-4h2v2h-2v-2zm4 0h2v2h-2v-2z"/>
-            </svg>
-            Escanear Invitación
-        </button>
-    </div>
+  <div class="app-wrapper">
+    <!-- ENCABEZADO ORIGINAL CON LOGO Y TÍTULO -->
+    <header class="brand-header">
+      <div class="brand-left">
+        <img 
+          src="logo.png" 
+          alt="Logo" 
+          class="custom-logo hidden" 
+          id="customLogoImg"
+          onload="this.classList.remove('hidden'); document.getElementById('defaultBlocksLogo').classList.add('hidden');"
+          onerror="this.classList.add('hidden');"
+        />
+        <div class="blocks-logo" id="defaultBlocksLogo" aria-label="Logo original">
+          <span class="block-item block-red"></span>
+          <span class="block-item block-blue"></span>
+          <span class="block-item block-mint"></span>
+        </div>
+        <div class="brand-titles">
+          <h1 class="brand-title">CONTROL DE MESAS</h1>
+          <span class="brand-subtitle" id="globalStats">0 / 0 invitados confirmados</span>
+        </div>
+      </div>
+      <div class="offline-pill" id="storageStatusBadge" title="Estado de memoria a prueba de fallos">
+        🛡️ Guardado Seguro
+      </div>
+    </header>
 
-    <!-- ═══ Pantalla del Escáner ═══ -->
-    <div id="scannerScreen" class="screen">
-        <div class="scanner-header">
-            <button id="btnVolver" class="btn-back" aria-label="Volver">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-                </svg>
-            </button>
-            <h1 class="scanner-title">Ximbal</h1>
-        </div>
-        <video id="cameraVideo" autoplay playsinline muted></video>
-        <canvas id="cameraCanvas" style="display:none;"></canvas>
-        <div class="scanner-overlay">
-            <div class="scanner-frame"></div>
-        </div>
-        <p id="scannerStatus" class="scanner-status">Enfocando cámara…</p>
-        <div class="scanner-bottom-bar">
-            <!-- Botón de captura por foto (alternativa para iOS PWA) -->
-            <button id="btnCapturarFoto" class="btn-capture">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 15.2c1.8 0 3.2-1.4 3.2-3.2S13.8 8.8 12 8.8 8.8 10.2 8.8 12s1.4 3.2 3.2 3.2zm8-8.8h-3.2l-1.6-2H8.8l-1.6 2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8.4c0-1.1-.9-2-2-2z"/>
-                </svg>
-                Tomar foto
-            </button>
-        </div>
-        <!-- Input oculto para captura por foto -->
-        <input type="file" id="inputFoto" accept="image/*" capture="environment" style="display:none;">
-    </div>
+    <!-- TARJETA BLANCA PRINCIPAL (TEMA ORIGINAL) -->
+    <main class="main-white-card">
+      <!-- Buscador rápido en la parte superior de la tarjeta -->
+      <div class="search-bar-wrapper">
+        <input 
+          type="search" 
+          id="searchInput" 
+          placeholder="🔍 Buscar invitado o número de mesa..." 
+          autocomplete="off"
+        />
+        <div class="search-results hidden" id="searchResults"></div>
+      </div>
 
-    <!-- ═══ Pantalla de Resultado ═══ -->
-    <div id="resultScreen" class="screen">
-        <div class="result-content">
-            <svg class="result-icon" width="56" height="56" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
-            </svg>
-            <h2 class="result-title">Invitación Verificada</h2>
-            <p class="result-subtitle">Se encontró la invitación correspondiente</p>
-            <p id="txtNombreArchivo" class="result-filename"></p>
-            <div class="result-card">
-                <img id="imgResultado" alt="Imagen de resultado">
+      <!-- VISTA 1: ESCÁNER DE CÓDIGO QR -->
+      <section id="scannerView" class="scanner-section">
+        <div class="orange-header-box scanner-title-box">
+          <div class="header-text-side">
+            <span class="table-label">ESCÁNER ACTIVO</span>
+            <h2>Código QR</h2>
+            <p class="table-counter">Escanea el QR para abrir su mesa</p>
+          </div>
+          <div class="scanner-icon-badge">📷</div>
+        </div>
+
+        <!-- Visor de cámara -->
+        <div class="camera-container" id="cameraBox">
+          <video id="qrVideo" playsinline webkit-playsinline muted autoplay></video>
+          <div class="scan-target-overlay">
+            <div class="scan-target-box"></div>
+          </div>
+          <div class="camera-placeholder" id="cameraPlaceholder">
+            <span class="cam-emoji">📷</span>
+            <p id="cameraStatusText">Presiona "Iniciar Cámara" para escanear el código QR</p>
+          </div>
+        </div>
+
+        <!-- Canvas oculto para decodificar QR -->
+        <canvas id="qrCanvas" class="hidden"></canvas>
+
+        <div class="scanner-actions">
+          <button type="button" class="btn-main-action" id="btnToggleCamera">
+            📷 Iniciar Cámara QR
+          </button>
+
+          <label for="qrFileInput" class="btn-alt-action">
+            🖼️ Escanear con Cámara Nativa / Foto
+          </label>
+          <input 
+            type="file" 
+            id="qrFileInput" 
+            accept="image/*" 
+            capture="environment" 
+            class="hidden" 
+          />
+        </div>
+
+        <!-- Botones de acceso directo a las 10 mesas -->
+        <div class="quick-tables-box">
+          <p class="quick-tables-title">O selecciona una mesa directamente:</p>
+          <nav class="table-tabs" id="tableTabs" aria-label="Selector de mesas"></nav>
+        </div>
+
+        <!-- Herramientas de Respaldo a Prueba de Fallos -->
+        <div class="backup-tools">
+          <button type="button" class="btn-backup" id="btnExportBackup">
+            💾 Descargar Respaldo
+          </button>
+          <label for="importBackupInput" class="btn-backup">
+            📂 Restaurar Respaldo
+          </label>
+          <input type="file" id="importBackupInput" accept=".json" class="hidden" />
+        </div>
+      </section>
+
+      <!-- VISTA 2: RESULTADO DE LA MESA (ENCABEZADO NARANJA + QR Y LISTA DE INVITADOS) -->
+      <section id="resultView" class="result-section hidden">
+        <div class="result-top-bar">
+          <button type="button" class="btn-return-scan" id="btnBackToScan">
+            ← Escanear otro QR
+          </button>
+          <span class="scan-status-tag" id="scanPill">✅ Mesa Cargada</span>
+        </div>
+
+        <!-- Recuadro Naranja: Encabezado de Número de Mesa + QR al lado -->
+        <div class="orange-header-box">
+          <div class="header-text-side">
+            <span class="table-label">ASIGNACIÓN</span>
+            <h2 id="tableTitle">Mesa 1</h2>
+            <p class="table-counter" id="tableCounter">0 de 0 presentes</p>
+          </div>
+          <div class="header-qr-side" id="qrContainer" title="Toca para ampliar el código QR">
+            <img id="tableQrImg" src="qr/1.png" alt="Código QR de la mesa" />
+          </div>
+        </div>
+
+        <!-- Lista de invitados de la mesa para palomear con confirmación -->
+        <div class="guest-list-container">
+          <div class="guest-list-toolbar">
+            <span class="guest-list-label">Invitados de la mesa</span>
+            <div class="toolbar-buttons">
+              <button type="button" class="btn-confirm-all" id="btnConfirmAllTable">
+                ✓ Confirmar Mesa
+              </button>
+              <button type="button" class="btn-edit-guests" id="btnToggleAdd">
+                + Editar
+              </button>
             </div>
-            <button id="btnEscanearOtro" class="btn-tonal">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 11h2V9H3v2zm0-4h2V5h2V3H3v4zm4 12H5v-2H3v4h4v-2zm10-12h2v2h2V7h-4v4h2V9zm-2 12v-2h2v-2h2v4h-4zm2-16V3h-4v2h2v2h2zM3 15h2v-2H3v2zm16 0h2v-2h-2v2zM5 5h6v6H5V5zm2 2v2h2V7H7zm6-2h6v6h-6V5zm2 2v2h2V7h-2zM5 13h6v6H5v-6zm2 2v2h2v-2H7zm6 0h2v2h-2v-2zm4 2h2v-2h-2v2zm-4-4h2v2h-2v-2zm4 0h2v2h-2v-2z"/>
-                </svg>
-                Escanear otro código
-            </button>
+          </div>
+
+          <!-- Formulario desplegable para agregar invitados offline -->
+          <form id="addGuestForm" class="add-guest-form hidden">
+            <input 
+              type="text" 
+              id="newGuestName" 
+              placeholder="Escribe el nombre del invitado..." 
+              required 
+            />
+            <button type="submit" class="btn-save-guest">Guardar</button>
+          </form>
+
+          <!-- Lista con círculos verdes y palomitas verdes idéntica al boceto -->
+          <ul class="guest-list" id="guestList"></ul>
         </div>
-    </div>
+      </section>
+    </main>
 
-    <!-- ═══ Pantalla de Error (QR no reconocido) ═══ -->
-    <div id="errorScreen" class="screen">
-        <div class="result-content">
-            <svg class="error-icon" width="56" height="56" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-            </svg>
-            <h2 class="result-title">QR No Reconocido</h2>
-            <p id="txtError" class="result-subtitle"></p>
-            <button id="btnReintentar" class="btn-tonal">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 11h2V9H3v2zm0-4h2V5h2V3H3v4zm4 12H5v-2H3v4h4v-2zm10-12h2v2h2V7h-4v4h2V9zm-2 12v-2h2v-2h2v4h-4zm2-16V3h-4v2h2v2h2zM3 15h2v-2H3v2zm16 0h2v-2h-2v2zM5 5h6v6H5V5zm2 2v2h2V7H7zm6-2h6v6h-6V5zm2 2v2h2V7h-2zM5 13h6v6H5v-6zm2 2v2h2v-2H7zm6 0h2v2h-2v-2zm4 2h2v-2h-2v2zm-4-4h2v2h-2v-2zm4 0h2v2h-2v-2z"/>
-                </svg>
-                Reintentar
-            </button>
+    <!-- MODAL DE DOBLE CONFIRMACIÓN AL PALOMEAR INVITADO O MESA -->
+    <div class="confirm-modal hidden" id="confirmModal" role="dialog" aria-modal="true">
+      <div class="confirm-modal-card">
+        <div class="confirm-icon" id="confirmModalIcon">✅</div>
+        <h3 id="confirmModalTitle">Confirmar Asistencia</h3>
+        <p id="confirmModalMessage">¿Confirmas la llegada de este invitado?</p>
+        <div class="confirm-modal-actions">
+          <button type="button" class="btn-confirm-cancel" id="btnConfirmCancel">
+            Cancelar
+          </button>
+          <button type="button" class="btn-confirm-accept" id="btnConfirmAccept">
+            Sí, confirmar
+          </button>
         </div>
+      </div>
     </div>
 
-    <!-- Cargando indicador -->
-    <div id="loadingOverlay" class="loading-overlay" style="display:none;">
-        <div class="spinner"></div>
-        <p>Cargando invitaciones…</p>
+    <!-- MODAL PARA VER EL CÓDIGO QR EN GRANDE -->
+    <div class="qr-modal hidden" id="qrModal">
+      <div class="qr-modal-card">
+        <h3 id="modalTableTitle">Mesa 1</h3>
+        <img id="modalQrImg" src="" alt="Código QR Ampliado" />
+        <button type="button" class="btn-close-modal" id="btnCloseModal">Cerrar</button>
+      </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-    <script src="app.js"></script>
+    <!-- AVISO FLOTANTE DE GUARDADO (TOAST) -->
+    <div class="save-toast hidden" id="saveToast">✅ Guardado en memoria segura</div>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
-

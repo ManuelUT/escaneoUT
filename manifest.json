@@ -1,20 +1,23 @@
 {
-    "name": "Ximbal - Escáner de Invitaciones",
-    "short_name": "Ximbal",
-    "description": "Escanea códigos QR para verificar invitaciones",
-    "start_url": "./index.html",
-    "display": "standalone",
-    "orientation": "portrait",
-    "background_color": "#F5EBD9",
-    "theme_color": "#F5EBD9",
-    "categories": ["utilities"],
-    "icons": [
-        {
-            "src": "icons/logo.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any maskable"
-        }
-    ]
+  "name": "Control de Mesas QR",
+  "short_name": "Mesas QR",
+  "description": "Escáner QR de mesas y control de invitados 100% offline a prueba de fallos",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#62c3a6",
+  "theme_color": "#62c3a6",
+  "icons": [
+    {
+      "src": "qr/1.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "qr/1.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
-
