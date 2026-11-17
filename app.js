@@ -139,7 +139,7 @@ const MESAS_INICIALES = {
 let estadoMesas = cargarDatosConVerificacion();
 let mapaQrMesas = cargarMapaQr();
 let mesaActual = 1;
-let modoEdicion = false;
+let modoEdicion = false; // true = modo para desconfirmar invitados
 let accionConfirmacionPendiente = null;
 let toastTimer = null;
 
@@ -173,9 +173,7 @@ const guestList = document.getElementById('guestList');
 const globalStats = document.getElementById('globalStats');
 const globalProgressBar = document.getElementById('globalProgressBar');
 const btnConfirmAllTable = document.getElementById('btnConfirmAllTable');
-const btnToggleAdd = document.getElementById('btnToggleAdd');
-const addGuestForm = document.getElementById('addGuestForm');
-const newGuestName = document.getElementById('newGuestName');
+const btnToggleEdit = document.getElementById('btnToggleEdit');
 const searchInput = document.getElementById('searchInput');
 const searchResults = document.getElementById('searchResults');
 
@@ -420,29 +418,39 @@ function solicitarConfirmacionInvitado(numMesa, invitado) {
   const mesa = estadoMesas[numMesa];
   if (!mesa) return;
 
-  const vaAConfirmar = !invitado.presente;
+  // Si ya está confirmado y NO estamos en modo edición → bloqueado
+  if (invitado.presente && !modoEdicion) return;
 
-  if (vaAConfirmar) {
+  if (!invitado.presente) {
+    // Confirmar llegada
     confirmModalIcon.textContent = '✅';
     confirmModalTitle.textContent = 'Confirmar Invitado';
     confirmModalMessage.innerHTML = `¿Confirmas la llegada de <strong>${invitado.nombre}</strong> en la <strong>Mesa ${numMesa}</strong>?`;
     btnConfirmAccept.textContent = '✅ Sí, confirmar llegada';
     btnConfirmAccept.classList.remove('uncheck-mode');
+
+    accionConfirmacionPendiente = () => {
+      invitado.presente = true;
+      invitado.hora = `Llegó ${obtenerHoraActual()}`;
+      emitirConfirmacionSonora();
+      guardarDatosAPruebaDeFallos(true);
+      renderizarTodo();
+    };
   } else {
+    // Desconfirmar (solo en modo edición)
     confirmModalIcon.textContent = '⚠️';
     confirmModalTitle.textContent = 'Quitar Confirmación';
     confirmModalMessage.innerHTML = `<strong>${invitado.nombre}</strong> (Mesa ${numMesa}) ya está confirmado${invitado.hora ? ` (${invitado.hora})` : ''}.<br><br>¿Seguro que deseas desmarcar su asistencia?`;
-    btnConfirmAccept.textContent = 'Sí, quitar palomita';
+    btnConfirmAccept.textContent = 'Sí, desmarcar';
     btnConfirmAccept.classList.add('uncheck-mode');
-  }
 
-  accionConfirmacionPendiente = () => {
-    invitado.presente = vaAConfirmar;
-    invitado.hora = vaAConfirmar ? `Llegó ${obtenerHoraActual()}` : null;
-    emitirConfirmacionSonora();
-    guardarDatosAPruebaDeFallos(true);
-    renderizarTodo();
-  };
+    accionConfirmacionPendiente = () => {
+      invitado.presente = false;
+      invitado.hora = null;
+      guardarDatosAPruebaDeFallos(true);
+      renderizarTodo();
+    };
+  }
 
   confirmModal.classList.remove('hidden');
 }
@@ -457,9 +465,9 @@ btnConfirmAllTable.addEventListener('click', () => {
   }
 
   confirmModalIcon.textContent = '👥';
-  confirmModalTitle.textContent = `Confirmar Mesa ${mesaActual}`;
-  confirmModalMessage.innerHTML = `¿Confirmar la asistencia de los <strong>${faltantes.length} invitados restantes</strong> de la <strong>Mesa ${mesaActual}</strong>?`;
-  btnConfirmAccept.textContent = `✅ Confirmar (${faltantes.length})`;
+  confirmModalTitle.textContent = `Confirmar Mesa ${mesaActual} Completa`;
+  confirmModalMessage.innerHTML = `¿Estás seguro de que <strong>TODOS los ${faltantes.length} invitados restantes</strong> de la <strong>Mesa ${mesaActual}</strong> ya llegaron?<br><br>Esta acción confirmará a todos los que faltan.`;
+  btnConfirmAccept.textContent = `✅ Sí, todos llegaron`;
   btnConfirmAccept.classList.remove('uncheck-mode');
 
   accionConfirmacionPendiente = () => {
@@ -646,6 +654,11 @@ function abrirMesa(numMesa, desdeQr = false) {
   if (!estadoMesas[numMesa]) return;
   mesaActual = Number(numMesa);
 
+  // Siempre resetear modo edición al abrir una mesa
+  modoEdicion = false;
+  btnToggleEdit.textContent = '✏️ Editar';
+  btnToggleEdit.classList.remove('edit-active');
+
   scannerView.classList.add('hidden');
   resultView.classList.remove('hidden');
 
@@ -818,7 +831,10 @@ function renderizarMesaActual() {
   guestList.innerHTML = '';
   datosMesa.invitados.forEach((invitado) => {
     const li = document.createElement('li');
-    li.className = `guest-item ${invitado.presente ? 'checked' : ''}`;
+    const estaConfirmado = invitado.presente;
+    const bloqueado = estaConfirmado && !modoEdicion;
+
+    li.className = `guest-item ${estaConfirmado ? 'checked' : ''} ${bloqueado ? 'locked' : ''}`;
 
     const leftDiv = document.createElement('div');
     leftDiv.className = 'guest-left';
@@ -839,10 +855,10 @@ function renderizarMesaActual() {
     nameSpan.textContent = invitado.nombre;
     infoDiv.appendChild(nameSpan);
 
-    if (invitado.presente && invitado.hora) {
+    if (estaConfirmado && invitado.hora) {
       const timeSpan = document.createElement('span');
       timeSpan.className = 'guest-time';
-      timeSpan.textContent = `✓ ${invitado.hora}`;
+      timeSpan.textContent = bloqueado ? `🔒 ${invitado.hora}` : `✓ ${invitado.hora}`;
       infoDiv.appendChild(timeSpan);
     }
 
@@ -850,28 +866,20 @@ function renderizarMesaActual() {
     leftDiv.appendChild(infoDiv);
     li.appendChild(leftDiv);
 
-    leftDiv.addEventListener('click', () => {
-      solicitarConfirmacionInvitado(mesaActual, invitado);
-    });
-
-    if (modoEdicion) {
-      const btnDel = document.createElement('button');
-      btnDel.type = 'button';
-      btnDel.className = 'btn-delete-guest';
-      btnDel.textContent = '✕';
-      btnDel.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (confirm(`¿Eliminar a "${invitado.nombre}" de la Mesa ${mesaActual}?`)) {
-          datosMesa.invitados = datosMesa.invitados.filter((item) => item.id !== invitado.id);
-          guardarDatosAPruebaDeFallos(true);
-          renderizarTodo();
-        }
+    if (!bloqueado) {
+      // No confirmado → puede confirmar
+      // O en modo edición y confirmado → puede desconfirmar
+      leftDiv.addEventListener('click', () => {
+        solicitarConfirmacionInvitado(mesaActual, invitado);
       });
-      li.appendChild(btnDel);
     }
 
     guestList.appendChild(li);
   });
+
+  // Mostrar/ocultar botón de confirmar mesa según si faltan invitados
+  const faltantes = datosMesa.invitados.filter((i) => !i.presente).length;
+  btnConfirmAllTable.classList.toggle('hidden', faltantes === 0);
 }
 
 function renderizarEstadisticasGlobales() {
@@ -894,31 +902,11 @@ function renderizarTodo() {
   renderizarEstadisticasGlobales();
 }
 
-btnToggleAdd.addEventListener('click', () => {
+btnToggleEdit.addEventListener('click', () => {
   modoEdicion = !modoEdicion;
-  addGuestForm.classList.toggle('hidden', !modoEdicion);
-  btnToggleAdd.textContent = modoEdicion ? 'Listo' : '+ Editar';
-  if (modoEdicion) {
-    newGuestName.focus();
-  }
+  btnToggleEdit.textContent = modoEdicion ? '✅ Listo' : '✏️ Editar';
+  btnToggleEdit.classList.toggle('edit-active', modoEdicion);
   renderizarMesaActual();
-});
-
-addGuestForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const nombre = newGuestName.value.trim();
-  if (!nombre) return;
-
-  estadoMesas[mesaActual].invitados.push({
-    id: `m${mesaActual}-${Date.now()}`,
-    nombre,
-    presente: false,
-    hora: null
-  });
-
-  newGuestName.value = '';
-  guardarDatosAPruebaDeFallos(true);
-  renderizarTodo();
 });
 
 // Buscador de invitados y mesas (1 a 8)

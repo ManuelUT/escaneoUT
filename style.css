@@ -741,22 +741,6 @@ body {
   letter-spacing: 0.05em;
 }
 
-.btn-confirm-all {
-  background: var(--primary);
-  border: none;
-  color: var(--on-primary);
-  font-weight: 700;
-  font-size: 0.76rem;
-  padding: 7px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-confirm-all:active {
-  opacity: 0.88;
-}
-
 .btn-edit-guests {
   background: var(--surface-container);
   border: 1px solid var(--outline-variant);
@@ -766,35 +750,34 @@ body {
   padding: 6px 12px;
   border-radius: 8px;
   cursor: pointer;
+  transition: all 0.15s;
 }
 
-.add-guest-form {
-  display: flex;
-  gap: 8px;
-}
-
-.add-guest-form input {
-  flex: 1;
-  padding: 10px 14px;
-  border: 1.5px solid var(--outline-variant);
-  border-radius: 10px;
-  font-size: 0.92rem;
-  outline: none;
-}
-
-.add-guest-form input:focus {
-  border-color: var(--primary);
-}
-
-.btn-save-guest {
-  background: var(--secondary);
+.btn-edit-guests.edit-active {
+  background: var(--error);
   color: var(--on-primary);
+  border-color: var(--error);
+}
+
+/* Botón Confirmar Mesa al final de la lista */
+.btn-confirm-all-bottom {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-sm);
   border: none;
-  padding: 0 16px;
-  border-radius: 10px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 0.95rem;
   font-weight: 800;
-  font-size: 0.88rem;
   cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: background 0.15s, transform 0.1s;
+  margin-top: 4px;
+}
+
+.btn-confirm-all-bottom:active {
+  background: var(--primary-dark);
+  transform: scale(0.985);
 }
 
 .guest-list {
@@ -824,6 +807,15 @@ body {
 .guest-item.checked {
   background: var(--primary-container);
   border-color: var(--primary);
+}
+
+.guest-item.locked {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.guest-item.locked:active {
+  transform: none;
 }
 
 .guest-left {

@@ -163,23 +163,19 @@
           <div class="guest-list-toolbar">
             <span class="guest-list-label">Invitados de la mesa</span>
             <div class="toolbar-buttons">
-              <button type="button" class="btn-confirm-all" id="btnConfirmAllTable">
-                ✓ Confirmar Mesa
-              </button>
-              <button type="button" class="btn-edit-guests" id="btnToggleAdd">
-                + Editar
+              <button type="button" class="btn-edit-guests" id="btnToggleEdit">
+                ✏️ Editar
               </button>
             </div>
           </div>
 
-          <!-- Formulario desplegable para agregar invitados offline -->
-          <form id="addGuestForm" class="add-guest-form hidden">
-            <input type="text" id="newGuestName" placeholder="Nombre del nuevo invitado..." required />
-            <button type="submit" class="btn-save-guest">Agregar</button>
-          </form>
-
           <!-- Lista interactiva de invitados -->
           <ul class="guest-list" id="guestList"></ul>
+
+          <!-- Confirmar Mesa Completa (al final) -->
+          <button type="button" class="btn-confirm-all-bottom" id="btnConfirmAllTable">
+            ✓ Confirmar Mesa Completa
+          </button>
         </div>
       </section>
     </main>
