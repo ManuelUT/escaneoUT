@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Ximbal - Control de Mesas</title>
 
   <!-- Configuración PWA para Android y navegadores estándar -->
@@ -13,24 +15,20 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Ximbal" />
-  <link rel="apple-touch-icon" href="logo/logo.jpg" />
+  <link rel="apple-touch-icon" href="icons/logo.png" />
 
   <link rel="stylesheet" href="style.css" />
-  <!-- Librería jsQR para lectura de QR en iOS y Android (cacheada en sw.js) -->
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <!-- Librería jsQR LOCAL para lectura de QR offline -->
+  <script src="jsQR.min.js"></script>
 </head>
+
 <body>
   <div class="app-wrapper">
     <!-- ENCABEZADO CON LOGO Y PROGRESO GLOBAL -->
     <header class="brand-header">
       <div class="brand-top-row">
         <div class="brand-left">
-          <img 
-            src="logo/logo.jpg" 
-            alt="Logo Ximbal" 
-            class="custom-logo hidden" 
-            id="customLogoImg"
-          />
+          <img src="icons/logo.png" alt="Logo Ximbal" class="custom-logo hidden" id="customLogoImg" />
           <div class="blocks-logo" id="defaultBlocksLogo" aria-label="Logo Ximbal">
             <span class="block-item block-red"></span>
             <span class="block-item block-blue"></span>
@@ -63,12 +61,7 @@
       <!-- Buscador rápido en la parte superior -->
       <div class="search-bar-wrapper">
         <span class="search-icon-prefix">🔍</span>
-        <input 
-          type="search" 
-          id="searchInput" 
-          placeholder="Buscar invitado o mesa (1 a 8)..." 
-          autocomplete="off"
-        />
+        <input type="search" id="searchInput" placeholder="Buscar invitado o mesa (1 a 8)..." autocomplete="off" />
         <div class="search-results hidden" id="searchResults"></div>
       </div>
 
@@ -118,13 +111,7 @@
           <label for="qrFileInput" class="btn-alt-action">
             🖼️ Escanear con Cámara Nativa / Foto
           </label>
-          <input 
-            type="file" 
-            id="qrFileInput" 
-            accept="image/*" 
-            capture="environment" 
-            class="hidden" 
-          />
+          <input type="file" id="qrFileInput" accept="image/*" capture="environment" class="hidden" />
         </div>
 
         <!-- Herramientas de Respaldo a Prueba de Fallos -->
@@ -137,6 +124,11 @@
           </label>
           <input type="file" id="importBackupInput" accept=".json" class="hidden" />
         </div>
+        <div class="reset-tools">
+          <button type="button" class="btn-reset-all" id="btnResetAll">
+            🔄 Reiniciar Todo
+          </button>
+        </div>
       </section>
 
       <!-- VISTA 2: RESULTADO DE LA MESA (DETALLE Y LISTA DE INVITADOS) -->
@@ -148,8 +140,7 @@
           <span class="scan-status-tag" id="scanPill">✅ Mesa Cargada</span>
         </div>
 
-        <!-- Barra rápida para cambiar entre las 8 mesas sin salir -->
-        <div class="inline-table-switcher" id="inlineTableSwitcher" aria-label="Cambio rápido de mesa"></div>
+        <!-- Barra rápida removida para evitar cambios accidentales de mesa -->
 
         <!-- Recuadro de Número de Mesa + QR al lado -->
         <div class="orange-header-box table-detail-header">
@@ -183,12 +174,7 @@
 
           <!-- Formulario desplegable para agregar invitados offline -->
           <form id="addGuestForm" class="add-guest-form hidden">
-            <input 
-              type="text" 
-              id="newGuestName" 
-              placeholder="Nombre del nuevo invitado..." 
-              required 
-            />
+            <input type="text" id="newGuestName" placeholder="Nombre del nuevo invitado..." required />
             <button type="submit" class="btn-save-guest">Agregar</button>
           </form>
 
@@ -227,10 +213,32 @@
       </div>
     </div>
 
+    <!-- MODAL DE CONTRASEÑA PARA REINICIO TOTAL -->
+    <div class="confirm-modal hidden" id="resetModal" role="dialog" aria-modal="true">
+      <div class="confirm-modal-card">
+        <div class="confirm-icon">🔒</div>
+        <h3>Reiniciar Todo</h3>
+        <p>Se borrarán <strong>TODOS</strong> los datos de asistencia y se regresará al estado original. Esta acción no
+          se puede deshacer.</p>
+        <input type="password" id="resetPasswordInput" placeholder="Contraseña de seguridad"
+          class="reset-password-input" autocomplete="off" inputmode="numeric" />
+        <p class="reset-error hidden" id="resetError">❌ Contraseña incorrecta</p>
+        <div class="confirm-modal-actions">
+          <button type="button" class="btn-confirm-cancel" id="btnResetCancel">
+            Cancelar
+          </button>
+          <button type="button" class="btn-confirm-accept uncheck-mode" id="btnResetConfirm">
+            🔄 Reiniciar
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- AVISO FLOTANTE DE GUARDADO (TOAST) -->
     <div class="save-toast hidden" id="saveToast">🛡️ Guardado en memoria segura</div>
   </div>
 
   <script src="app.js"></script>
 </body>
+
 </html>

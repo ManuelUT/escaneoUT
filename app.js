@@ -1,107 +1,137 @@
 const TOTAL_MESAS = 8;
-const STORAGE_KEY = 'control_mesas_invitados_v5_8mesas';
-const STORAGE_BACKUP_KEY = 'control_mesas_invitados_v5_8mesas_backup';
-const LEGACY_STORAGE_KEY = 'control_mesas_invitados_v4';
-const QR_MAP_KEY = 'mapa_codigos_qr_mesas_v5_8mesas';
+const STORAGE_KEY = 'control_mesas_invitados_v6_real';
+const STORAGE_BACKUP_KEY = 'control_mesas_invitados_v6_real_backup';
+const LEGACY_STORAGE_KEY = 'control_mesas_invitados_v5_8mesas';
+const QR_MAP_KEY = 'mapa_codigos_qr_mesas_v6_real';
 const IDB_NAME = 'MesasQRFailSafeDB';
 const IDB_STORE = 'estado_mesas_store';
 
-// Datos iniciales de las 8 mesas
+// Datos iniciales de las 8 mesas con nombres reales
 const MESAS_INICIALES = {
   1: {
     numero: 1,
     qr: 'qr/1.png',
     invitados: [
-      { id: 'm1-1', nombre: 'Tal nombre', presente: true, hora: 'Confirmado' },
-      { id: 'm1-2', nombre: 'Esquís', presente: true, hora: 'Confirmado' },
-      { id: 'm1-3', nombre: 'Invitado 3', presente: false, hora: null },
-      { id: 'm1-4', nombre: 'Invitado 4', presente: false, hora: null },
-      { id: 'm1-5', nombre: 'Invitado 5', presente: false, hora: null },
-      { id: 'm1-6', nombre: 'Invitado 6', presente: false, hora: null }
+      { id: 'm1-1', nombre: 'Noemí Ruiz', presente: false, hora: null },
+      { id: 'm1-2', nombre: 'Rosaura Ruiz', presente: false, hora: null },
+      { id: 'm1-3', nombre: 'Candelaria Ruiz', presente: false, hora: null },
+      { id: 'm1-4', nombre: 'Berenice Sosa', presente: false, hora: null },
+      { id: 'm1-5', nombre: 'Judit Sosa', presente: false, hora: null },
+      { id: 'm1-6', nombre: 'Carlos Midense', presente: false, hora: null },
+      { id: 'm1-7', nombre: 'Marcos Esquivel', presente: false, hora: null },
+      { id: 'm1-8', nombre: 'Aleida Esquivel', presente: false, hora: null },
+      { id: 'm1-9', nombre: 'Mariana Midense', presente: false, hora: null },
+      { id: 'm1-10', nombre: 'Ariel Uicab', presente: false, hora: null },
+      { id: 'm1-11', nombre: 'Alondra Chan', presente: false, hora: null },
+      { id: 'm1-12', nombre: 'Aidé Segovia', presente: false, hora: null }
     ]
   },
   2: {
     numero: 2,
     qr: 'qr/2.png',
     invitados: [
-      { id: 'm2-1', nombre: 'Invitado 1', presente: false, hora: null },
-      { id: 'm2-2', nombre: 'Invitado 2', presente: false, hora: null },
-      { id: 'm2-3', nombre: 'Invitado 3', presente: false, hora: null },
-      { id: 'm2-4', nombre: 'Invitado 4', presente: false, hora: null },
-      { id: 'm2-5', nombre: 'Invitado 5', presente: false, hora: null },
-      { id: 'm2-6', nombre: 'Invitado 6', presente: false, hora: null }
+      { id: 'm2-1', nombre: 'Jose Gutiérrez', presente: false, hora: null },
+      { id: 'm2-2', nombre: 'Araceli Góngora', presente: false, hora: null },
+      { id: 'm2-3', nombre: 'Carlos Gutiérrez', presente: false, hora: null },
+      { id: 'm2-4', nombre: 'Melany Gutiérrez', presente: false, hora: null },
+      { id: 'm2-5', nombre: 'Alberto Torres', presente: false, hora: null },
+      { id: 'm2-6', nombre: 'Florentina Moo', presente: false, hora: null },
+      { id: 'm2-7', nombre: 'Marcela Moo', presente: false, hora: null },
+      { id: 'm2-8', nombre: 'Julio Canul', presente: false, hora: null },
+      { id: 'm2-9', nombre: 'Naydi Interian', presente: false, hora: null },
+      { id: 'm2-10', nombre: 'María Yah', presente: false, hora: null },
+      { id: 'm2-11', nombre: 'Alberto Interian', presente: false, hora: null },
+      { id: 'm2-12', nombre: 'Zully Chimal', presente: false, hora: null }
     ]
   },
   3: {
     numero: 3,
     qr: 'qr/3.png',
     invitados: [
-      { id: 'm3-1', nombre: 'Invitado 1', presente: false, hora: null },
-      { id: 'm3-2', nombre: 'Invitado 2', presente: false, hora: null },
-      { id: 'm3-3', nombre: 'Invitado 3', presente: false, hora: null },
-      { id: 'm3-4', nombre: 'Invitado 4', presente: false, hora: null },
-      { id: 'm3-5', nombre: 'Invitado 5', presente: false, hora: null },
-      { id: 'm3-6', nombre: 'Invitado 6', presente: false, hora: null }
+      { id: 'm3-1', nombre: 'Santos Chan', presente: false, hora: null },
+      { id: 'm3-2', nombre: 'Flor Romero', presente: false, hora: null },
+      { id: 'm3-3', nombre: 'Jazmín Roa', presente: false, hora: null },
+      { id: 'm3-4', nombre: 'Juan Pablo Ku', presente: false, hora: null },
+      { id: 'm3-5', nombre: 'Mili Hernández', presente: false, hora: null },
+      { id: 'm3-6', nombre: 'Pedro Caamal', presente: false, hora: null },
+      { id: 'm3-7', nombre: 'Jazmin Caamal', presente: false, hora: null },
+      { id: 'm3-8', nombre: 'Benjamin Escovedo', presente: false, hora: null },
+      { id: 'm3-9', nombre: 'Lisset Yam', presente: false, hora: null },
+      { id: 'm3-10', nombre: 'Goreti Aldana', presente: false, hora: null },
+      { id: 'm3-11', nombre: 'Wendy Chan', presente: false, hora: null },
+      { id: 'm3-12', nombre: 'Cristofher Romero', presente: false, hora: null }
     ]
   },
   4: {
     numero: 4,
     qr: 'qr/4.png',
     invitados: [
-      { id: 'm4-1', nombre: 'Invitado 1', presente: false, hora: null },
-      { id: 'm4-2', nombre: 'Invitado 2', presente: false, hora: null },
-      { id: 'm4-3', nombre: 'Invitado 3', presente: false, hora: null },
-      { id: 'm4-4', nombre: 'Invitado 4', presente: false, hora: null },
-      { id: 'm4-5', nombre: 'Invitado 5', presente: false, hora: null },
-      { id: 'm4-6', nombre: 'Invitado 6', presente: false, hora: null }
+      { id: 'm4-1', nombre: 'María Ek', presente: false, hora: null },
+      { id: 'm4-2', nombre: 'Antonio Ku', presente: false, hora: null },
+      { id: 'm4-3', nombre: 'Lizeth Ku', presente: false, hora: null },
+      { id: 'm4-4', nombre: 'Gloria Chacón', presente: false, hora: null }
     ]
   },
   5: {
     numero: 5,
     qr: 'qr/5.png',
     invitados: [
-      { id: 'm5-1', nombre: 'Invitado 1', presente: false, hora: null },
-      { id: 'm5-2', nombre: 'Invitado 2', presente: false, hora: null },
-      { id: 'm5-3', nombre: 'Invitado 3', presente: false, hora: null },
-      { id: 'm5-4', nombre: 'Invitado 4', presente: false, hora: null },
-      { id: 'm5-5', nombre: 'Invitado 5', presente: false, hora: null },
-      { id: 'm5-6', nombre: 'Invitado 6', presente: false, hora: null }
+      { id: 'm5-1', nombre: 'Bernardino Hau', presente: false, hora: null },
+      { id: 'm5-2', nombre: 'Liliana Interian', presente: false, hora: null },
+      { id: 'm5-3', nombre: 'Carlos Paredes', presente: false, hora: null },
+      { id: 'm5-4', nombre: 'Jorge Caamal', presente: false, hora: null },
+      { id: 'm5-5', nombre: 'Yamily Moen', presente: false, hora: null },
+      { id: 'm5-6', nombre: 'Yoselin Trinidad', presente: false, hora: null },
+      { id: 'm5-7', nombre: 'Jose Romero', presente: false, hora: null },
+      { id: 'm5-8', nombre: 'Lucia Del Carmen', presente: false, hora: null },
+      { id: 'm5-9', nombre: 'Suemi Días', presente: false, hora: null },
+      { id: 'm5-10', nombre: 'Jorge Domínguez', presente: false, hora: null },
+      { id: 'm5-11', nombre: 'Kevin May', presente: false, hora: null },
+      { id: 'm5-12', nombre: 'Yazmin Kituc', presente: false, hora: null }
     ]
   },
   6: {
     numero: 6,
     qr: 'qr/6.png',
     invitados: [
-      { id: 'm6-1', nombre: 'Invitado 1', presente: false, hora: null },
-      { id: 'm6-2', nombre: 'Invitado 2', presente: false, hora: null },
-      { id: 'm6-3', nombre: 'Invitado 3', presente: false, hora: null },
-      { id: 'm6-4', nombre: 'Invitado 4', presente: false, hora: null },
-      { id: 'm6-5', nombre: 'Invitado 5', presente: false, hora: null },
-      { id: 'm6-6', nombre: 'Invitado 6', presente: false, hora: null }
+      { id: 'm6-1', nombre: 'Kevin Medina', presente: false, hora: null },
+      { id: 'm6-2', nombre: 'Luis Sandoval', presente: false, hora: null }
     ]
   },
   7: {
     numero: 7,
     qr: 'qr/7.png',
     invitados: [
-      { id: 'm7-1', nombre: 'Invitado 1', presente: false, hora: null },
-      { id: 'm7-2', nombre: 'Invitado 2', presente: false, hora: null },
-      { id: 'm7-3', nombre: 'Invitado 3', presente: false, hora: null },
-      { id: 'm7-4', nombre: 'Invitado 4', presente: false, hora: null },
-      { id: 'm7-5', nombre: 'Invitado 5', presente: false, hora: null },
-      { id: 'm7-6', nombre: 'Invitado 6', presente: false, hora: null }
+      { id: 'm7-1', nombre: 'María Ojeda', presente: false, hora: null },
+      { id: 'm7-2', nombre: 'David Salazar', presente: false, hora: null },
+      { id: 'm7-3', nombre: 'Aracelly Solís', presente: false, hora: null },
+      { id: 'm7-4', nombre: 'Mayra Castillo', presente: false, hora: null },
+      { id: 'm7-5', nombre: 'Ricardo Tun', presente: false, hora: null },
+      { id: 'm7-6', nombre: 'Cielo Xool', presente: false, hora: null },
+      { id: 'm7-7', nombre: 'Luis Ramires', presente: false, hora: null },
+      { id: 'm7-8', nombre: 'Yolanda Ucan', presente: false, hora: null },
+      { id: 'm7-9', nombre: 'Bilma Ramires', presente: false, hora: null },
+      { id: 'm7-10', nombre: 'Alexander Briceño', presente: false, hora: null },
+      { id: 'm7-11', nombre: 'Yoana Cauich', presente: false, hora: null },
+      { id: 'm7-12', nombre: 'María Marín', presente: false, hora: null }
     ]
   },
   8: {
     numero: 8,
     qr: 'qr/8.png',
     invitados: [
-      { id: 'm8-1', nombre: 'Invitado 1', presente: false, hora: null },
-      { id: 'm8-2', nombre: 'Invitado 2', presente: false, hora: null },
-      { id: 'm8-3', nombre: 'Invitado 3', presente: false, hora: null },
-      { id: 'm8-4', nombre: 'Invitado 4', presente: false, hora: null },
-      { id: 'm8-5', nombre: 'Invitado 5', presente: false, hora: null },
-      { id: 'm8-6', nombre: 'Invitado 6', presente: false, hora: null }
+      { id: 'm8-1', nombre: 'Miguel Varguez', presente: false, hora: null },
+      { id: 'm8-2', nombre: 'Goretty Nahual', presente: false, hora: null },
+      { id: 'm8-3', nombre: 'Pascual Ucan', presente: false, hora: null },
+      { id: 'm8-4', nombre: 'Angelica Dzib', presente: false, hora: null },
+      { id: 'm8-5', nombre: 'Miguel Peña', presente: false, hora: null },
+      { id: 'm8-6', nombre: 'Carol Carzo', presente: false, hora: null },
+      { id: 'm8-7', nombre: 'Josefa Peña', presente: false, hora: null },
+      { id: 'm8-8', nombre: 'Abraham Sánchez', presente: false, hora: null },
+      { id: 'm8-9', nombre: 'Leydi May', presente: false, hora: null },
+      { id: 'm8-10', nombre: 'María Cocom', presente: false, hora: null },
+      { id: 'm8-11', nombre: 'Roberto Flores', presente: false, hora: null },
+      { id: 'm8-12', nombre: 'Yarely Martines', presente: false, hora: null }
     ]
   }
 };
@@ -134,7 +164,6 @@ const scanPill = document.getElementById('scanPill');
 const storageStatusBadge = document.getElementById('storageStatusBadge');
 
 const tableTabs = document.getElementById('tableTabs');
-const inlineTableSwitcher = document.getElementById('inlineTableSwitcher');
 const tableTitle = document.getElementById('tableTitle');
 const tableCounter = document.getElementById('tableCounter');
 const tableProgressBar = document.getElementById('tableProgressBar');
@@ -171,14 +200,12 @@ const importBackupInput = document.getElementById('importBackupInput');
 
 function inicializarLogoPersonalizado() {
   const rutasLogo = [
-    'logo/logo.jpg',
-    'logo/logo.png',
-    'icons/logo.jpg',
     'icons/logo.png',
-    'img/logo.jpg',
-    'img/logo.png',
-    'logo.jpg',
-    'logo.png'
+    'icons/logo.jpg',
+    'logo/logo.png',
+    'logo/logo.jpg',
+    'logo.png',
+    'logo.jpg'
   ];
   let indice = 0;
 
@@ -226,37 +253,55 @@ function esEstructuraValida(datos) {
 }
 
 function cargarDatosConVerificacion() {
-  // 1. Intentar leer almacenamiento principal de 8 mesas
+  // Contar invitados esperados en MESAS_INICIALES
+  const totalEsperado = Object.values(MESAS_INICIALES).reduce(
+    (sum, m) => sum + m.invitados.length, 0
+  );
+
+  // 1. Intentar leer almacenamiento principal
   try {
     const primario = normalizarAOchoMesas(JSON.parse(localStorage.getItem(STORAGE_KEY)));
-    if (primario) return primario;
+    if (primario) {
+      const totalGuardado = Object.values(primario).reduce(
+        (sum, m) => sum + m.invitados.length, 0
+      );
+      // Solo usar datos guardados si tienen la misma cantidad de invitados
+      if (totalGuardado === totalEsperado) return primario;
+    }
   } catch (e) {
-    console.warn('Fallo en almacenamiento primario, intentando espejo...', e);
+    console.warn('Fallo en almacenamiento primario:', e);
   }
 
   // 2. Intentar espejo secundario
   try {
     const espejo = normalizarAOchoMesas(JSON.parse(localStorage.getItem(STORAGE_BACKUP_KEY)));
     if (espejo) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(espejo));
-      return espejo;
+      const totalEspejo = Object.values(espejo).reduce(
+        (sum, m) => sum + m.invitados.length, 0
+      );
+      if (totalEspejo === totalEsperado) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(espejo));
+        return espejo;
+      }
     }
   } catch (e) {
     console.warn('Fallo en espejo secundario:', e);
   }
 
-  // 3. Migrar automáticamente datos de las mesas 1 a 8 si existía la versión anterior (v4)
+  // 3. Limpiar datos obsoletos y cargar los datos frescos
   try {
-    const legado = normalizarAOchoMesas(JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY)));
-    if (legado) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(legado));
-      localStorage.setItem(STORAGE_BACKUP_KEY, JSON.stringify(legado));
-      return legado;
-    }
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STORAGE_BACKUP_KEY);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
   } catch (_) {}
 
-  // 4. Cargar las 8 mesas por defecto
-  return JSON.parse(JSON.stringify(MESAS_INICIALES));
+  // 4. Cargar las 8 mesas con los nombres reales
+  const datosNuevos = JSON.parse(JSON.stringify(MESAS_INICIALES));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(datosNuevos));
+    localStorage.setItem(STORAGE_BACKUP_KEY, JSON.stringify(datosNuevos));
+  } catch (_) {}
+  return datosNuevos;
 }
 
 function abrirBaseIndexedDB() {
@@ -734,7 +779,6 @@ btnBackToScan.addEventListener('click', () => {
 
 function renderizarPestanas() {
   tableTabs.innerHTML = '';
-  inlineTableSwitcher.innerHTML = '';
 
   for (let num = 1; num <= TOTAL_MESAS; num++) {
     const mesa = estadoMesas[num];
@@ -755,17 +799,6 @@ function renderizarPestanas() {
       abrirMesa(num, false);
     });
     tableTabs.appendChild(btn);
-
-    // Pastilla rápida en la vista de detalle (1 a 8)
-    const miniBtn = document.createElement('button');
-    miniBtn.type = 'button';
-    miniBtn.className = `mini-table-pill ${num === mesaActual ? 'active' : ''} ${completa ? 'done' : ''}`;
-    miniBtn.textContent = `M${num}`;
-    miniBtn.title = `Ir a Mesa ${num} (${presentes}/${total})`;
-    miniBtn.addEventListener('click', () => {
-      abrirMesa(num, false);
-    });
-    inlineTableSwitcher.appendChild(miniBtn);
   }
 }
 
@@ -1001,6 +1034,98 @@ qrModal.addEventListener('click', (e) => {
     qrModal.classList.add('hidden');
   }
 });
+
+/* ==========================================================================
+   REINICIO TOTAL CON CONTRASEÑA DE SEGURIDAD
+   ========================================================================== */
+
+const RESET_PASSWORD = '1234';
+const btnResetAll = document.getElementById('btnResetAll');
+const resetModal = document.getElementById('resetModal');
+const resetPasswordInput = document.getElementById('resetPasswordInput');
+const resetError = document.getElementById('resetError');
+const btnResetCancel = document.getElementById('btnResetCancel');
+const btnResetConfirm = document.getElementById('btnResetConfirm');
+
+btnResetAll.addEventListener('click', () => {
+  resetPasswordInput.value = '';
+  resetError.classList.add('hidden');
+  resetModal.classList.remove('hidden');
+  setTimeout(() => resetPasswordInput.focus(), 150);
+});
+
+btnResetCancel.addEventListener('click', () => {
+  resetModal.classList.add('hidden');
+  resetPasswordInput.value = '';
+  resetError.classList.add('hidden');
+});
+
+resetModal.addEventListener('click', (e) => {
+  if (e.target === resetModal) {
+    resetModal.classList.add('hidden');
+    resetPasswordInput.value = '';
+    resetError.classList.add('hidden');
+  }
+});
+
+btnResetConfirm.addEventListener('click', () => {
+  if (resetPasswordInput.value === RESET_PASSWORD) {
+    // Borrar TODO
+    estadoMesas = JSON.parse(JSON.stringify(MESAS_INICIALES));
+    mapaQrMesas = {};
+
+    // Limpiar localStorage
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_BACKUP_KEY);
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+      localStorage.removeItem(QR_MAP_KEY);
+    } catch (_) {}
+
+    // Limpiar IndexedDB
+    (async () => {
+      try {
+        const db = await abrirBaseIndexedDB();
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).clear();
+      } catch (_) {}
+    })();
+
+    // Guardar estado limpio
+    guardarDatosAPruebaDeFallos(false);
+
+    // Volver al inicio
+    detenerCamara();
+    volverAlEscaner();
+    modoEdicion = false;
+    addGuestForm.classList.add('hidden');
+    btnToggleAdd.textContent = '+ Editar';
+
+    renderizarTodo();
+    resetModal.classList.add('hidden');
+    resetPasswordInput.value = '';
+    resetError.classList.add('hidden');
+    mostrarToast('🔄 Todo reiniciado correctamente');
+  } else {
+    resetError.classList.remove('hidden');
+    resetPasswordInput.value = '';
+    resetPasswordInput.focus();
+    // Vibrar para indicar error
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+  }
+});
+
+// Enter en el campo de contraseña
+resetPasswordInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    btnResetConfirm.click();
+  }
+});
+
+/* ==========================================================================
+   REGISTRO DE SERVICE WORKER Y URL PARAMS
+   ========================================================================== */
 
 function verificarParametroUrl() {
   const params = new URLSearchParams(window.location.search);
