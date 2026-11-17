@@ -1086,8 +1086,8 @@ btnResetConfirm.addEventListener('click', () => {
     detenerCamara();
     volverAlEscaner();
     modoEdicion = false;
-    addGuestForm.classList.add('hidden');
-    btnToggleAdd.textContent = '+ Editar';
+    btnToggleEdit.textContent = '✏️ Editar';
+    btnToggleEdit.classList.remove('edit-active');
 
     renderizarTodo();
     resetModal.classList.add('hidden');
